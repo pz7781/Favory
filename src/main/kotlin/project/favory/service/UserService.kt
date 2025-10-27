@@ -2,7 +2,7 @@ package project.favory.service
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import project.favory.dto.user.UserRequest
+import project.favory.dto.user.CreateUserRequest
 import project.favory.dto.user.UserResponse
 import project.favory.entity.User
 import project.favory.repository.UserRepository
@@ -12,7 +12,7 @@ class UserService (
     private val userRepository: UserRepository
 ){
     @Transactional
-    fun create(req: UserRequest): UserResponse {
+    fun create(req: CreateUserRequest): UserResponse {
         if (userRepository.existsByEmail(req.email)) {
             throw IllegalArgumentException("이미 사용 중인 이메일입니다.")
         }

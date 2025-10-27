@@ -10,19 +10,19 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import project.favory.dto.user.UserRequest
+import project.favory.dto.user.CreateUserRequest
 import project.favory.dto.user.UserResponse
 import project.favory.service.UserService
 
 @Tag(name = "User", description = "유저 테스트 CRUD")
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 class UserController(
     private val userService: UserService
 ) {
     @Operation(summary = "유저 생성")
     @PostMapping
-    fun create(@Valid @RequestBody req: UserRequest): UserResponse =
+    fun create(@Valid @RequestBody req: CreateUserRequest): UserResponse =
         userService.create(req)
 
     @Operation(summary = "개인 유저 조회")
