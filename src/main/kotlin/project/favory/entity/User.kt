@@ -19,8 +19,8 @@ class User(
     var nickname: String,
 
     @Column(length = 500, nullable = true)
-    var profileImageUrl: String?,
+    var profileImageUrl: String? = null,
 
     @Column(columnDefinition = "TEXT", nullable = true)
-    var profileMessage: String?
+    var profileMessage: String? = null
 ) : AbstractTimeEntity()
