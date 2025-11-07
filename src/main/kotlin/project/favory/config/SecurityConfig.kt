@@ -46,13 +46,14 @@ class SecurityConfig(
             .cors { it.configurationSource(corsConfigurationSource()) }
             .formLogin { it.disable() }
             .httpBasic { it.disable() }
+            .logout { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
                 it
                     // 스웨거 문서
                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                    // 회원가입, 로그인
-                    .requestMatchers("/signup", "/login").permitAll()
+                    // 회원가입, 로그인, 로그아웃
+                    .requestMatchers("/signup", "/login", "logout").permitAll()
                     // 유저 조회
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/users/**").permitAll()
                     // 그 외(수정,삭제)는 인증

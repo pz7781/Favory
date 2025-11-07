@@ -34,4 +34,11 @@ class AuthController(
         return ResponseEntity.ok(token)
     }
 
+    @Operation(summary = "로그아웃")
+    @PostMapping("/logout")
+    fun logout(): ResponseEntity<String> {
+        // token 삭제 필요
+        return ResponseEntity.ok("로그아웃 성공")
+    }
+
 }
