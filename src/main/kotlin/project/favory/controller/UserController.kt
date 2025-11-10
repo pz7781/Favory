@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import project.favory.dto.user.request.UpdateUserRequest
 import project.favory.dto.user.response.UserResponse
-import project.favory.service.user.UserService
+import project.favory.service.UserService
 
 @Tag(name = "User", description = "유저 프로필 조회/수정/삭제")
 @RestController

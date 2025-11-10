@@ -12,7 +12,7 @@ import project.favory.dto.auth.request.LoginRequest
 import project.favory.dto.auth.request.SignupRequest
 import project.favory.dto.auth.response.TokenResponse
 import project.favory.dto.user.response.UserResponse
-import project.favory.service.auth.AuthService
+import project.favory.service.AuthService
 
 @Tag(name = "Auth", description = "유저 회원가입/로그인/로그아웃")
 @RestController
