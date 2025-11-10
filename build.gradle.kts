@@ -44,6 +44,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.5.6")
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation
     implementation("org.springframework.boot:spring-boot-starter-validation:3.5.6")
+    // https://mvnrepository.com/artifact/software.amazon.awssdk/s3
+    implementation("software.amazon.awssdk:s3:2.20.26")
 }
 
 kotlin {
