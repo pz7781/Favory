@@ -41,3 +41,6 @@ out/
 
 ### Version ###
 .tool-versions
+
+### Environment Variables ###
+.env

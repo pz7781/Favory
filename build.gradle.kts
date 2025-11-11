@@ -46,6 +46,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation:3.5.6")
     // https://mvnrepository.com/artifact/software.amazon.awssdk/s3
     implementation("software.amazon.awssdk:s3:2.20.26")
+    // https://mvnrepository.com/artifact/me.paulschwarz/spring-dotenv
+    implementation("me.paulschwarz:spring-dotenv:4.0.0")
 }
 
 kotlin {
