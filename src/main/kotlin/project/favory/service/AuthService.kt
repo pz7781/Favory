@@ -1,4 +1,4 @@
-package project.favory.service.auth
+package project.favory.service
 
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service

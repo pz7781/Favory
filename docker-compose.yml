@@ -1,0 +1,31 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: favory-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: favory
+      MYSQL_USER: favory
+      MYSQL_PASSWORD: favory
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: unless-stopped
+
+  app:
+    build: .
+    container_name: favory-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+    restart: unless-stopped
+
+
+volumes:
+  db_data:
