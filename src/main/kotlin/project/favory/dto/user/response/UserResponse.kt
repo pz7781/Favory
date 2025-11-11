@@ -1,4 +1,4 @@
-package project.favory.dto.user
+package project.favory.dto.user.response
 
 class UserResponse (
     val id: Long,
@@ -7,5 +7,4 @@ class UserResponse (
     val profileImageUrl: String?,
     val profileMessage: String?
 ){
-
 }
