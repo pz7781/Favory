@@ -14,12 +14,12 @@ class JwtTokenProvider (
 
     @Value("\${jwt.secret}") secret: String,
 
-    // 1시간 - 보안상
-    @Value("\${jwt.access-token-expiration-ms:60*60*1000}")
+    // 보안상 - 1시간
+    @Value("\${jwt.access-token-expiration-ms}")
     private val accessTokenValidity: Long,
 
-    // 14일 - 새로 발급
-    @Value("\${jwt.refresh-token-expiration-ms:14*24*60*60*1000}")
+    // 새로 발급 - 14일
+    @Value("\${jwt.refresh-token-expiration-ms}")
     private val refreshTokenValidity: Long
     ) {
 
