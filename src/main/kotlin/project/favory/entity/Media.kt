@@ -16,14 +16,14 @@ class Media(
     @Column(length = 200, nullable = false)
     var title: String,
 
-    @Column(length = 200, nullable = false)
-    var credit: String,
-
     @Column(nullable = false)
     var year: Int,
 
     @Column(length = 500, nullable = true)
-    var imageUrl: String?
+    var imageUrl: String?,
+
+    @Column(length = 200, nullable = false, unique = true)
+    val externalId: String
 ) : AbstractTimeEntity()
 
 enum class MediaType {

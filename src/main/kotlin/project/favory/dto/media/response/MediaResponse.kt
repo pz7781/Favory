@@ -5,9 +5,9 @@ import java.time.LocalDateTime
 
 data class MediaResponse(
     val id: Long,
+    val externalId: String,
     val type: MediaType,
     val title: String,
-    val credit: String,
     val year: Int,
     val imageUrl: String?,
     val tags: List<TagInfo> = emptyList(),
