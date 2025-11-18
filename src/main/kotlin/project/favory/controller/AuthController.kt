@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import project.favory.dto.auth.request.LoginRequest
 import project.favory.dto.auth.request.SignupRequest
-import project.favory.dto.auth.response.TokenResponse
-import project.favory.dto.user.response.UserResponse
+import project.favory.dto.auth.response.UserResponse
+import project.favory.dto.auth.response.LoginResponse
 import project.favory.service.AuthService
 
 @Tag(name = "Auth", description = "유저 회원가입/로그인/로그아웃")
@@ -29,7 +29,7 @@ class AuthController(
 
     @Operation(summary = "로그인")
     @PostMapping("/login")
-    fun login(@Valid @RequestBody req: LoginRequest): ResponseEntity<TokenResponse> {
+    fun login(@Valid @RequestBody req: LoginRequest): ResponseEntity<LoginResponse> {
         val token = authService.login(req)
         return ResponseEntity.ok(token)
     }

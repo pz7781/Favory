@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import project.favory.dto.auth.request.LoginRequest
 import project.favory.dto.auth.request.SignupRequest
-import project.favory.dto.auth.response.TokenResponse
-import project.favory.dto.user.response.UserResponse
+import project.favory.dto.auth.response.LoginResponse
+import project.favory.dto.auth.response.UserResponse
 import project.favory.entity.User
 import project.favory.repository.UserRepository
 import project.favory.security.JwtTokenProvider
@@ -24,6 +24,11 @@ class AuthService(
     @Transactional
     fun signup(req: SignupRequest): UserResponse {
 
+        // 비밀번호 확인 일치 체크
+        if (req.password != req.passwordConfirmation) {
+            throw IllegalArgumentException("비밀번호가 일치하지 않습니다.")
+        }
+
         // 중복체크
         if (userRepository.existsByEmail(req.email)) {
             throw IllegalArgumentException("이미 사용 중인 이메일입니다.")
@@ -31,7 +36,6 @@ class AuthService(
         if (userRepository.existsByNickname(req.nickname)) {
             throw IllegalArgumentException("이미 사용 중인 닉네임입니다.")
         }
-
 
         // 비밀번호 암호화
         val encoded = passwordEncoder.encode(req.password)
@@ -41,17 +45,15 @@ class AuthService(
             User(
                 email = req.email,
                 password = encoded,
-                nickname = req.nickname,
-                profileImageUrl = req.profileImageUrl,
-                profileMessage = req.profileMessage
+                nickname = req.nickname
             )
         )
-        return saved.toResponse()
+        return saved.toAuthResponse()
     }
 
     // 로그인
     @Transactional(readOnly = true)
-    fun login(req: LoginRequest): TokenResponse {
+    fun login(req: LoginRequest): LoginResponse {
         val user = userRepository.findByEmail(req.email)
             ?: throw IllegalArgumentException("이메일이 올바르지 않습니다.")
 
@@ -62,18 +64,20 @@ class AuthService(
         val accessToken = jwtTokenProvider.generateAccessToken(user.id!!, user.email)
         val refreshToken = jwtTokenProvider.generateRefreshToken(user.id!!, user.email)
 
-        return TokenResponse(
+        return LoginResponse(
             accessToken = accessToken,
-            refreshToken = refreshToken
+            refreshToken = refreshToken,
+            tokenType = "Bearer",
+            user = user.toAuthResponse()
         )
     }
 
-    private fun User.toResponse() = UserResponse(
+    private fun User.toAuthResponse() = UserResponse(
         id = this.id!!,
         email = this.email,
         nickname = this.nickname,
-        profileImageUrl = this.profileImageUrl,
-        profileMessage = this.profileMessage
+        createdAt = this.createdAt,
+        updatedAt = this.updatedAt
     )
 
 }
