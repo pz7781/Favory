@@ -1,10 +1,9 @@
 package project.favory.dto.auth.response
 
-import project.favory.dto.user.response.UserResponse
-
-class LoginResponse(
+data class LoginResponse(
     val accessToken: String,
     val refreshToken: String,
+    val tokenType: String = "Bearer",
     val user: UserResponse
 ) {
 }

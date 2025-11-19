@@ -25,7 +25,7 @@ class UserService (
             ?.toResponse()
             ?: throw NoSuchElementException("사용자를 찾을 수 없습니다.")
 
-    // 이메일으로 조회
+    // 이메일로 조회
     @Transactional(readOnly = true)
     fun getByEmail(email: String): UserResponse =
         userRepository.findByEmail(email)
