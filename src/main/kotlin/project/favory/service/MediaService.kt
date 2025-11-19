@@ -5,10 +5,10 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import project.favory.dto.media.request.CreateMediaRequest
 import project.favory.dto.media.request.UpdateMediaRequest
+import project.favory.dto.media.response.MediaExistsResponse
 import project.favory.dto.media.response.MediaResponse
 import project.favory.dto.media.response.TagInfo
 import project.favory.entity.Media
-import project.favory.entity.MediaTagMapping
 import project.favory.entity.MediaType
 import project.favory.repository.MediaRepository
 import project.favory.repository.MediaTagMappingRepository
@@ -22,28 +22,24 @@ class MediaService(
     private val mediaTagMappingRepository: MediaTagMappingRepository
 ) {
 
+    fun checkMediaExists(externalId: String): MediaExistsResponse {
+        val media = mediaRepository.findByExternalId(externalId)
+        return MediaExistsResponse(
+            mediaId = media?.id
+        )
+    }
+
     @Transactional
     fun createMedia(request: CreateMediaRequest): MediaResponse {
         val media = Media(
+            externalId = request.externalId,
             type = request.type,
             title = request.title,
-            credit = request.credit,
             year = request.year,
             imageUrl = request.imageUrl
         )
 
         val savedMedia = mediaRepository.save(media)
-
-        request.tagIds?.forEach { tagId ->
-            val tag = tagRepository.findByIdOrNull(tagId)
-                ?: throw IllegalArgumentException("Tag not found with id: $tagId")
-
-            val mapping = MediaTagMapping(
-                media = savedMedia,
-                tag = tag
-            )
-            mediaTagMappingRepository.save(mapping)
-        }
 
         return savedMedia.toResponse()
     }
@@ -87,7 +83,6 @@ class MediaService(
             ?: throw IllegalArgumentException("Media not found with id: $id")
 
         media.title = request.title
-        media.credit = request.credit
         media.year = request.year
         media.imageUrl = request.imageUrl
 
@@ -113,9 +108,9 @@ class MediaService(
 
         return MediaResponse(
             id = id!!,
+            externalId = externalId,
             type = type,
             title = title,
-            credit = credit,
             year = year,
             imageUrl = imageUrl,
             tags = tags,

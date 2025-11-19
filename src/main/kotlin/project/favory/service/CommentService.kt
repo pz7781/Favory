@@ -59,8 +59,8 @@ class CommentService(
         reviewRepository.findByIdOrNull(reviewId)
             ?: throw IllegalArgumentException("Review not found with id: $reviewId")
 
-        return commentRepository.findAll()
-            .filter { it.review.id == reviewId && it.deletedAt == null }
+        return commentRepository.findAllByReviewId(reviewId)
+            .filter { it.deletedAt == null }
             .map { it.toResponse() }
     }
 
