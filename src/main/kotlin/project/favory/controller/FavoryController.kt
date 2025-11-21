@@ -1,0 +1,55 @@
+package project.favory.controller
+
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.web.bind.annotation.*
+import project.favory.dto.common.PageResponse
+import project.favory.dto.favory.request.CreateFavoryRequest
+import project.favory.dto.favory.request.UpdateFavoryRequest
+import project.favory.dto.favory.response.FavoryResponse
+import project.favory.service.FavoryService
+
+@Tag(name = "Favory", description = "Favory 생성/조회/수정/삭제")
+@RestController
+@RequestMapping("/favorys")
+class FavoryController(
+    private val favoryService: FavoryService
+) {
+
+    @Operation(summary = "Favory 생성")
+    @PostMapping
+    fun createFavory(@RequestBody request: CreateFavoryRequest): FavoryResponse {
+        return favoryService.createFavory(request)
+    }
+
+    @Operation(summary = "전체 Favory 조회 (페이징, 정렬: latest/oldest)")
+    @GetMapping
+    fun getAllFavorys(
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "10") size: Int,
+        @RequestParam(defaultValue = "latest") sort: String
+    ): PageResponse<FavoryResponse> {
+        return favoryService.getAllFavorys(page, size, sort)
+    }
+
+    @Operation(summary = "미디어별 Favory 조회")
+    @GetMapping("/media/{mediaId}")
+    fun getFavorysByMedia(@PathVariable mediaId: Long): List<FavoryResponse> {
+        return favoryService.getFavorysByMedia(mediaId)
+    }
+
+    @Operation(summary = "Favory 수정")
+    @PutMapping("/{id}")
+    fun updateFavory(
+        @PathVariable id: Long,
+        @RequestBody request: UpdateFavoryRequest
+    ): FavoryResponse {
+        return favoryService.updateFavory(id, request)
+    }
+
+    @Operation(summary = "Favory 삭제")
+    @DeleteMapping("/{id}")
+    fun deleteFavory(@PathVariable id: Long) {
+        favoryService.deleteFavory(id)
+    }
+}

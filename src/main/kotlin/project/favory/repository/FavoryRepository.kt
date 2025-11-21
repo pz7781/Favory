@@ -1,6 +1,6 @@
 package project.favory.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
-import project.favory.entity.Review
+import project.favory.entity.Favory
 
-interface ReviewRepository : JpaRepository<Review, Long>
+interface FavoryRepository : JpaRepository<Favory, Long>

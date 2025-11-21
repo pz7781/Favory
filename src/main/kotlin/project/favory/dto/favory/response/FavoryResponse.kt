@@ -1,8 +1,8 @@
-package project.favory.dto.review.response
+package project.favory.dto.favory.response
 
 import java.time.LocalDateTime
 
-data class ReviewResponse(
+data class FavoryResponse(
     val id: Long,
     val userId: Long,
     val userNickname: String,

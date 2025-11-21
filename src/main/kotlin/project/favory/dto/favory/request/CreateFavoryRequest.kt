@@ -1,6 +1,6 @@
-package project.favory.dto.review.request
+package project.favory.dto.favory.request
 
-data class CreateReviewRequest(
+data class CreateFavoryRequest(
     val userId: Long,
     val mediaId: Long,
     val title: String,

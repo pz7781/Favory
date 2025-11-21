@@ -21,10 +21,10 @@ class CommentController(
         return commentService.createComment(request)
     }
 
-    @Operation(summary = "리뷰별 댓글 조회")
-    @GetMapping("/review/{reviewId}")
-    fun getCommentsByReview(@PathVariable reviewId: Long): List<CommentResponse> {
-        return commentService.getCommentsByReview(reviewId)
+    @Operation(summary = "Favory별 댓글 조회")
+    @GetMapping("/favory/{favoryId}")
+    fun getCommentsByFavory(@PathVariable favoryId: Long): List<CommentResponse> {
+        return commentService.getCommentsByFavory(favoryId)
     }
 
     @Operation(summary = "댓글 수정")
