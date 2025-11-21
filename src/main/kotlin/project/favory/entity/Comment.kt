@@ -11,8 +11,8 @@ class Comment(
     val id: Long? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "review_id", nullable = false)
-    val review: Review,
+    @JoinColumn(name = "favory_id", nullable = false)
+    val favory: Favory,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

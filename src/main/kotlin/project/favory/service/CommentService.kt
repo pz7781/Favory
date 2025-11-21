@@ -8,7 +8,7 @@ import project.favory.dto.comment.request.UpdateCommentRequest
 import project.favory.dto.comment.response.CommentResponse
 import project.favory.entity.Comment
 import project.favory.repository.CommentRepository
-import project.favory.repository.ReviewRepository
+import project.favory.repository.FavoryRepository
 import project.favory.repository.UserRepository
 import java.time.LocalDateTime
 
@@ -16,20 +16,20 @@ import java.time.LocalDateTime
 @Transactional(readOnly = true)
 class CommentService(
     private val commentRepository: CommentRepository,
-    private val reviewRepository: ReviewRepository,
+    private val favoryRepository: FavoryRepository,
     private val userRepository: UserRepository
 ) {
 
     @Transactional
     fun createComment(request: CreateCommentRequest): CommentResponse {
-        val review = reviewRepository.findByIdOrNull(request.reviewId)
-            ?: throw IllegalArgumentException("Review not found with id: ${request.reviewId}")
+        val favory = favoryRepository.findByIdOrNull(request.favoryId)
+            ?: throw IllegalArgumentException("Favory not found with id: ${request.favoryId}")
 
         val user = userRepository.findByIdOrNull(request.userId)
             ?: throw IllegalArgumentException("User not found with id: ${request.userId}")
 
         val comment = Comment(
-            review = review,
+            favory = favory,
             user = user,
             content = request.content
         )
@@ -55,11 +55,11 @@ class CommentService(
             .map { it.toResponse() }
     }
 
-    fun getCommentsByReview(reviewId: Long): List<CommentResponse> {
-        reviewRepository.findByIdOrNull(reviewId)
-            ?: throw IllegalArgumentException("Review not found with id: $reviewId")
+    fun getCommentsByFavory(favoryId: Long): List<CommentResponse> {
+        favoryRepository.findByIdOrNull(favoryId)
+            ?: throw IllegalArgumentException("Favory not found with id: $favoryId")
 
-        return commentRepository.findAllByReviewId(reviewId)
+        return commentRepository.findAllByFavoryId(favoryId)
             .filter { it.deletedAt == null }
             .map { it.toResponse() }
     }
@@ -88,7 +88,7 @@ class CommentService(
 
     private fun Comment.toResponse() = CommentResponse(
         id = id!!,
-        reviewId = review.id!!,
+        favoryId = favory.id!!,
         userId = user.id!!,
         userNickname = user.nickname,
         content = content,
