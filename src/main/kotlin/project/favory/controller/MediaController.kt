@@ -39,17 +39,15 @@ class MediaController(
     }
 
     @Deprecated("미사용")
-    @Operation(summary = "미디어 목록 조회 (타입/키워드/태그별)")
+    @Operation(summary = "미디어 목록 조회 (타입/키워드별)")
     @GetMapping
     fun getAllMedia(
         @RequestParam(required = false) type: MediaType?,
-        @RequestParam(required = false) keyword: String?,
-        @RequestParam(required = false) tagId: Long?
+        @RequestParam(required = false) keyword: String?
     ): List<MediaResponse> {
         return when {
             type != null -> mediaService.getMediaByType(type)
             keyword != null -> mediaService.searchMediaByTitle(keyword)
-            tagId != null -> mediaService.getMediaByTag(tagId)
             else -> mediaService.getAllMedia()
         }
     }

@@ -16,8 +16,11 @@ class Media(
     @Column(length = 200, nullable = false)
     var title: String,
 
-    @Column(nullable = false)
-    var year: Int,
+    @Column(length = 200, nullable = true)
+    var creator: String? = null,
+
+    @Column(nullable = true)
+    var year: Int?,
 
     @Column(length = 500, nullable = true)
     var imageUrl: String?,

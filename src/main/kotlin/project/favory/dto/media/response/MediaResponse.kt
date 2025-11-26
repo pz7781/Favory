@@ -8,14 +8,9 @@ data class MediaResponse(
     val externalId: String,
     val type: MediaType,
     val title: String,
-    val year: Int,
+    val creator: String? = null,
+    val year: Int?,
     val imageUrl: String?,
-    val tags: List<TagInfo> = emptyList(),
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
-)
-
-data class TagInfo(
-    val id: Long,
-    val name: String
 )

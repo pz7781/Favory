@@ -6,6 +6,7 @@ data class CreateMediaRequest(
     val externalId: String,
     val type: MediaType,
     val title: String,
-    val year: Int,
+    val creator: String? = null,
+    val year: Int?,
     val imageUrl: String?
 )
