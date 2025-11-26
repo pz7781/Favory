@@ -32,7 +32,7 @@ class MediaSearchService(
         return response.tracks?.items?.map { track ->
             MediaSearchResult(
                 title = track.name,
-                creator = track.artists.firstOrNull()?.name ?: "",
+                creator = track.artists.firstOrNull()?.name,
                 year = extractYearFromDate(track.album.releaseDate),
                 imageUrl = track.album.images.firstOrNull()?.url,
                 mediaType = MediaType.MUSIC,
@@ -47,7 +47,7 @@ class MediaSearchService(
 
         return movies.mapNotNull { movie ->
             val detail = tmdbService.getMovieDetail(movie.id)
-            val director = detail?.let { tmdbService.getDirector(it) } ?: ""
+            val director = detail?.let { tmdbService.getDirector(it) }
             val posterUrl = tmdbService.getPosterUrl(movie.posterPath)
 
             MediaSearchResult(
@@ -69,7 +69,7 @@ class MediaSearchService(
             val detail = tmdbService.getTvDetail(tv.id)
             val creator = detail?.credits?.crew
                 ?.firstOrNull { it.job in listOf("Producer", "Executive Producer", "Creator") }
-                ?.name ?: ""
+                ?.name
             val posterUrl = tmdbService.getPosterUrl(tv.posterPath)
 
             MediaSearchResult(
@@ -89,7 +89,7 @@ class MediaSearchService(
         return response.items?.map { book ->
             MediaSearchResult(
                 title = book.volumeInfo.title,
-                creator = book.volumeInfo.authors?.firstOrNull() ?: "",
+                creator = book.volumeInfo.authors?.firstOrNull(),
                 year = extractYearFromDate(book.volumeInfo.publishedDate),
                 imageUrl = book.volumeInfo.imageLinks?.thumbnail
                     ?: book.volumeInfo.imageLinks?.smallThumbnail,
@@ -99,13 +99,13 @@ class MediaSearchService(
         } ?: emptyList()
     }
 
-    private fun extractYearFromDate(dateString: String?): Int {
-        if (dateString.isNullOrBlank()) return 0
+    private fun extractYearFromDate(dateString: String?): Int? {
+        if (dateString.isNullOrBlank()) return null
 
         return try {
             dateString.substring(0, 4).toInt()
         } catch (e: Exception) {
-            0
+            null
         }
     }
 }

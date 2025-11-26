@@ -11,7 +11,7 @@ import project.favory.service.FavoryService
 
 @Tag(name = "Favory", description = "Favory 생성/조회/수정/삭제")
 @RestController
-@RequestMapping("/favorys")
+@RequestMapping("/favories")
 class FavoryController(
     private val favoryService: FavoryService
 ) {
@@ -24,18 +24,18 @@ class FavoryController(
 
     @Operation(summary = "전체 Favory 조회 (페이징, 정렬: latest/oldest)")
     @GetMapping
-    fun getAllFavorys(
+    fun getAllFavories(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "10") size: Int,
         @RequestParam(defaultValue = "latest") sort: String
     ): PageResponse<FavoryResponse> {
-        return favoryService.getAllFavorys(page, size, sort)
+        return favoryService.getAllFavories(page, size, sort)
     }
 
     @Operation(summary = "미디어별 Favory 조회")
     @GetMapping("/media/{mediaId}")
-    fun getFavorysByMedia(@PathVariable mediaId: Long): List<FavoryResponse> {
-        return favoryService.getFavorysByMedia(mediaId)
+    fun getFavoriesByMedia(@PathVariable mediaId: Long): List<FavoryResponse> {
+        return favoryService.getFavoriesByMedia(mediaId)
     }
 
     @Operation(summary = "Favory 수정")

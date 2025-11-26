@@ -11,11 +11,9 @@ import project.favory.dto.common.PageResponse
 import project.favory.dto.favory.request.CreateFavoryRequest
 import project.favory.dto.favory.request.UpdateFavoryRequest
 import project.favory.dto.favory.response.FavoryResponse
+import project.favory.dto.favory.response.TagInfo
 import project.favory.entity.Favory
-import project.favory.repository.CommentRepository
-import project.favory.repository.MediaRepository
-import project.favory.repository.FavoryRepository
-import project.favory.repository.UserRepository
+import project.favory.repository.*
 import java.time.LocalDateTime
 
 @Service
@@ -24,7 +22,8 @@ class FavoryService(
     private val favoryRepository: FavoryRepository,
     private val userRepository: UserRepository,
     private val mediaRepository: MediaRepository,
-    private val commentRepository: CommentRepository
+    private val commentRepository: CommentRepository,
+    private val favoryTagMappingRepository: FavoryTagMappingRepository
 ) {
 
     @Transactional
@@ -58,7 +57,7 @@ class FavoryService(
         return favory.toResponse()
     }
 
-    fun getAllFavorys(page: Int = 0, size: Int = 10, sortBy: String = "latest"): PageResponse<FavoryResponse> {
+    fun getAllFavories(page: Int = 0, size: Int = 10, sortBy: String = "latest"): PageResponse<FavoryResponse> {
         val sort = when (sortBy) {
             "oldest" -> Sort.by(Sort.Direction.ASC, "createdAt")
             else -> Sort.by(Sort.Direction.DESC, "createdAt")
@@ -80,7 +79,7 @@ class FavoryService(
         )
     }
 
-    fun getFavorysByMedia(mediaId: Long): List<FavoryResponse> {
+    fun getFavoriesByMedia(mediaId: Long): List<FavoryResponse> {
         mediaRepository.findByIdOrNull(mediaId)
             ?: throw IllegalArgumentException("Media not found with id: $mediaId")
 
@@ -119,16 +118,27 @@ class FavoryService(
         }
     }
 
-    private fun Favory.toResponse() = FavoryResponse(
-        id = id!!,
-        userId = user.id!!,
-        userNickname = user.nickname,
-        mediaId = media.id!!,
-        mediaTitle = media.title,
-        title = title,
-        content = content,
-        createdAt = createdAt,
-        updatedAt = updatedAt,
-        deletedAt = deletedAt
-    )
+    private fun Favory.toResponse(): FavoryResponse {
+        val tags = favoryTagMappingRepository.findAllByFavoryId(id!!)
+            .map { TagInfo(id = it.tag.id!!, name = it.tag.name) }
+
+        return FavoryResponse(
+            id = id!!,
+            userId = user.id!!,
+            userNickname = user.nickname,
+            userImageUrl = user.profileImageUrl,
+            mediaId = media.id!!,
+            mediaTitle = media.title,
+            mediaCreator = media.creator,
+            mediaYear = media.year,
+            mediaType = media.type,
+            mediaImageUrl = media.imageUrl,
+            title = title,
+            content = content,
+            tags = tags,
+            createdAt = createdAt,
+            updatedAt = updatedAt,
+            deletedAt = deletedAt
+        )
+    }
 }

@@ -7,19 +7,14 @@ import project.favory.dto.media.request.CreateMediaRequest
 import project.favory.dto.media.request.UpdateMediaRequest
 import project.favory.dto.media.response.MediaExistsResponse
 import project.favory.dto.media.response.MediaResponse
-import project.favory.dto.media.response.TagInfo
 import project.favory.entity.Media
 import project.favory.entity.MediaType
 import project.favory.repository.MediaRepository
-import project.favory.repository.MediaTagMappingRepository
-import project.favory.repository.TagRepository
 
 @Service
 @Transactional(readOnly = true)
 class MediaService(
-    private val mediaRepository: MediaRepository,
-    private val tagRepository: TagRepository,
-    private val mediaTagMappingRepository: MediaTagMappingRepository
+    private val mediaRepository: MediaRepository
 ) {
 
     fun checkMediaExists(externalId: String): MediaExistsResponse {
@@ -35,6 +30,7 @@ class MediaService(
             externalId = request.externalId,
             type = request.type,
             title = request.title,
+            creator = request.creator,
             year = request.year,
             imageUrl = request.imageUrl
         )
@@ -68,21 +64,13 @@ class MediaService(
             .map { it.toResponse() }
     }
 
-    fun getMediaByTag(tagId: Long): List<MediaResponse> {
-        tagRepository.findByIdOrNull(tagId)
-            ?: throw IllegalArgumentException("Tag not found with id: $tagId")
-
-        return mediaTagMappingRepository.findAll()
-            .filter { it.tag.id == tagId }
-            .map { it.media.toResponse() }
-    }
-
     @Transactional
     fun updateMedia(id: Long, request: UpdateMediaRequest): MediaResponse {
         val media = mediaRepository.findByIdOrNull(id)
             ?: throw IllegalArgumentException("Media not found with id: $id")
 
         media.title = request.title
+        media.creator = request.creator
         media.year = request.year
         media.imageUrl = request.imageUrl
 
@@ -94,26 +82,18 @@ class MediaService(
         val media = mediaRepository.findByIdOrNull(id)
             ?: throw IllegalArgumentException("Media not found with id: $id")
 
-        mediaTagMappingRepository.findAll()
-            .filter { it.media.id == id }
-            .forEach { mediaTagMappingRepository.delete(it) }
-
         mediaRepository.delete(media)
     }
 
     private fun Media.toResponse(): MediaResponse {
-        val tags = mediaTagMappingRepository.findAll()
-            .filter { it.media.id == this.id }
-            .map { TagInfo(id = it.tag.id!!, name = it.tag.name) }
-
         return MediaResponse(
             id = id!!,
             externalId = externalId,
             type = type,
             title = title,
+            creator = creator,
             year = year,
             imageUrl = imageUrl,
-            tags = tags,
             createdAt = createdAt,
             updatedAt = updatedAt
         )
