@@ -67,7 +67,7 @@ CREATE TABLE search_recent (
     INDEX idx_search_recent_last_used_at (last_used_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE favory_tag_mapping (
+CREATE TABLE favory_tag_mappings (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     favory_id BIGINT NOT NULL,
     tag_id BIGINT NOT NULL,
