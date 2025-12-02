@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 data class MediaResponse(
     val id: Long,
     val externalId: String,
-    val type: MediaType,
+    val mediaType: MediaType,
     val title: String,
     val creator: String? = null,
     val year: Int?,
