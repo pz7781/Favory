@@ -59,7 +59,7 @@ class JwtAuthenticationFilter(
         }
 
         val header = request.getHeader(HttpHeaders.AUTHORIZATION)
-        val token = header?.takeIf { it.startsWith("Bearer ") }?.substring(7)
+        val token = header?.takeIf { it.startsWith("Bearer") }?.substring(7)
 
         if (!token.isNullOrBlank()
             && jwtTokenProvider.validateToken(token)
