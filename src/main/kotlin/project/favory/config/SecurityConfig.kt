@@ -58,6 +58,8 @@ class SecurityConfig(
                     .requestMatchers("/signup", "/login", "/logout").permitAll()
                     // 유저 조회
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/users/**").permitAll()
+                    // Favory 조회
+                    .requestMatchers(org.springframework.http.HttpMethod.GET, "/favories", "/favories/**").permitAll()
                     // 그 외(수정,삭제)는 인증
                     .anyRequest().authenticated()
             }
