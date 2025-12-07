@@ -12,13 +12,14 @@ import project.favory.dto.searchRecent.request.SearchRequest
 import project.favory.entity.User
 import project.favory.repository.UserRepository
 import project.favory.service.SearchService
+import project.favory.service.UserService
 
 @Tag(name = "Search", description = "검색 결과 조회, 최근 검색어 조회/삭제")
 @RestController
 @RequestMapping("/search")
 class SearchController (
     private val searchService: SearchService,
-    private val userRepository: UserRepository
+    private val userService: UserService
 ){
 
     @Operation(summary = "검색 결과 조회")
@@ -26,31 +27,21 @@ class SearchController (
     fun search(
         request: SearchRequest
     ): PageResponse<*> {
-        val userId = getCurrentUserOrNull()?.id
+        val userId = userService.getCurrentUserOrNull()?.id
         return searchService.search(userId, request)
-    }
-
-    private fun getCurrentUserOrNull(): User? {
-        val auth = SecurityContextHolder.getContext().authentication ?: return null
-        if (!auth.isAuthenticated || auth.principal == "anonymousUser") {
-            return null
-        }
-
-        val email = auth.name ?: return null
-        return userRepository.findByEmail(email)
     }
 
     @Operation(summary = "최근 검색어 조회")
     @GetMapping("/recent")
     fun getRecents(): List<String> {
-        val user = getCurrentUserOrNull() ?: return emptyList()
+        val user = userService.getCurrentUserOrNull() ?: return emptyList()
         return searchService.getRecentSearches(user.id!!)
     }
 
     @Operation(summary = "최근 검색어 전체 삭제")
     @DeleteMapping("/recent")
     fun clearAll() {
-        val user = getCurrentUserOrNull() ?: return
+        val user = userService.getCurrentUserOrNull() ?: return
         searchService.clearRecentSearches(user.id!!)
     }
 }

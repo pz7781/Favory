@@ -71,7 +71,7 @@ class SearchService(
 
     private fun toSort(sort: String): Sort =
         when (sort.lowercase()) {
-            "oldest", "created" -> Sort.by(Sort.Direction.ASC, "createdAt")
+            "oldest" -> Sort.by(Sort.Direction.ASC, "createdAt")
             else -> Sort.by(Sort.Direction.DESC, "createdAt")
         }
 
@@ -131,7 +131,7 @@ class SearchService(
     }
 
     // 프로필
-    private fun searchProfile(keyword: String, pageable: Pageable): PageResponse<Any> {
+    private fun searchProfile(keyword: String, pageable: Pageable): PageResponse<SearchProfileItem> {
         val page = userRepository.findByNicknameContainingIgnoreCase(keyword, pageable)
 
         val content = page.content.map { user ->

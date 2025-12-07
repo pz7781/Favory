@@ -1,7 +1,9 @@
 package project.favory.service
 
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import project.favory.common.exception.UserNotFoundException
 import project.favory.dto.user.request.UpdateUserRequest
 import project.favory.dto.user.response.UserResponse
 import project.favory.entity.User
@@ -13,6 +15,22 @@ import project.favory.repository.UserRepository
 class UserService (
     private val userRepository: UserRepository
 ){
+
+    fun getCurrentUserOrNull(): User? {
+        val auth = SecurityContextHolder.getContext().authentication ?: return null
+
+        if (!auth.isAuthenticated || auth.principal == "anonymousUser") {
+            return null
+        }
+        val email = auth.name ?: return null
+
+        return userRepository.findByEmail(email)
+    }
+
+    fun getCurrentUserOrThrow(): User {
+        return getCurrentUserOrNull()
+            ?: throw UserNotFoundException()
+    }
 
     // 반복 패턴 캡슐화 - 아이디 존재 확인
     private fun findByIdOrThrow(id: Long): User =

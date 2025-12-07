@@ -18,9 +18,9 @@ interface FavoryRepository : JpaRepository<Favory, Long> {
         where f.deletedAt is null
           and (:category is null or m.type = :category)
           and (
-                lower(m.title) like lower(concat('%', :keyword, '%'))
-             or lower(coalesce(m.creator, '')) like lower(concat('%', :keyword, '%'))
-             or lower(f.title) like lower(concat('%', :keyword, '%'))
+                lower(m.title) like lower(concat(:keyword, '%'))
+             or lower(coalesce(m.creator, '')) like lower(concat(:keyword, '%'))
+             or lower(f.title) like lower(concat(:keyword, '%'))
           )
         """
     )
