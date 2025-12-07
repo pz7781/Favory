@@ -7,6 +7,7 @@ data class CommentResponse(
     val favoryId: Long,
     val userId: Long,
     val userNickname: String,
+    val userImageUrl: String? = null,
     val content: String,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
