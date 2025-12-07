@@ -58,7 +58,6 @@ class SecurityConfig(
                     // 회원가입, 로그인, 로그아웃
                     .requestMatchers("/signup", "/login", "/logout").permitAll()
                     // 유저 조회
-                    .requestMatchers(HttpMethod.GET, "/users/me").authenticated()
                     .requestMatchers(HttpMethod.GET, "/users/**").permitAll()
                     // 검색
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/search").permitAll()

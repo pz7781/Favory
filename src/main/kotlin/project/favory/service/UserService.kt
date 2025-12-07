@@ -2,6 +2,7 @@ package project.favory.service
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import project.favory.common.exception.UserNotFoundException
 import project.favory.dto.user.request.UpdateUserRequest
 import project.favory.dto.user.response.UserResponse
 import project.favory.entity.User
@@ -30,7 +31,7 @@ class UserService (
     fun getByEmail(email: String): UserResponse =
         userRepository.findByEmail(email)
             ?.toResponse()
-            ?: throw NoSuchElementException("사용자를 찾을 수 없습니다.")
+            ?: throw UserNotFoundException()
 
     // 아이디로 조회
     @Transactional(readOnly = true)

@@ -17,35 +17,22 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 import project.favory.dto.user.request.UpdateUserRequest
 import project.favory.dto.user.response.UserResponse
-import project.favory.repository.UserRepository
 import project.favory.service.UserService
 
 @Tag(name = "User", description = "유저 프로필 조회/수정/삭제")
 @RestController
 @RequestMapping("/users")
 class UserController(
-    private val userService: UserService,
-    private val userRepository: UserRepository
+    private val userService: UserService
 ) {
 
+    @Operation(summary = "내 정보 조회")
     @GetMapping("/me")
-    fun getMe(): UserResponse {
-        val authentication = SecurityContextHolder.getContext().authentication
-            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "인증 정보가 없습니다.")
-
-        val email = authentication.name
-            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "인증 정보가 올바르지 않습니다.")
-
-        val user = userRepository.findByEmail(email)
-            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "유저를 찾을 수 없습니다.")
-
-        return UserResponse(
-            id = user.id!!,
-            email = user.email,
-            nickname = user.nickname,
-            profileImageUrl = user.profileImageUrl,
-            profileMessage = user.profileMessage
-        )
+    @PreAuthorize("isAuthenticated()")
+    fun getMe(): ResponseEntity<UserResponse> {
+        val email = getCurrentUserEmail()
+        val response = userService.getByEmail(email)
+        return ResponseEntity.ok(response)
     }
 
     @Operation(summary = "유저 조회")
@@ -68,5 +55,21 @@ class UserController(
     fun delete(@PathVariable id: Long): ResponseEntity<Void> {
         userService.delete(id)
         return ResponseEntity.noContent().build()
+    }
+
+    private fun getCurrentUserEmail(): String {
+        val authentication = SecurityContextHolder.getContext().authentication
+            ?: throw ResponseStatusException(
+                HttpStatus.UNAUTHORIZED,
+                "인증 정보가 없습니다."
+            )
+
+        val email = authentication.name
+        if (email.isNullOrBlank()) {
+            throw ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                "인증 정보가 올바르지 않습니다.")
+        }
+
+        return email
     }
 }

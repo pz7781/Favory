@@ -6,8 +6,10 @@ import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.server.ResponseStatusException
 import project.favory.dto.common.ErrorResponse
 import project.favory.dto.common.FieldErrorDetail
+import java.nio.file.attribute.UserPrincipalNotFoundException
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
@@ -51,5 +53,19 @@ class GlobalExceptionHandler {
         )
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body)
+    }
+
+    // 유저 없음
+    @ExceptionHandler(UserNotFoundException::class)
+    fun handleUserNotFound(
+        ex: UserNotFoundException
+    ): ResponseEntity<ErrorResponse> {
+
+        val body = ErrorResponse(
+            message = ex.message ?: "사용자를 찾을 수 없습니다.",
+            details = null
+        )
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body)
     }
 }
