@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import project.favory.dto.auth.request.LoginRequest
+import project.favory.dto.auth.request.RefreshTokenRequest
 import project.favory.dto.auth.request.SignupRequest
 import project.favory.dto.auth.response.UserResponse
 import project.favory.dto.auth.response.LoginResponse
@@ -39,6 +40,13 @@ class AuthController(
     fun logout(): ResponseEntity<String> {
         // token 삭제 필요
         return ResponseEntity.ok("로그아웃 성공")
+    }
+
+    @Operation(summary = "리프레시 토큰")
+    @PostMapping("/refresh-token")
+    fun refresh(@Valid @RequestBody req: RefreshTokenRequest): ResponseEntity<LoginResponse> {
+        val result = authService.refreshToken(req.refreshToken)
+        return ResponseEntity.ok(result)
     }
 
 }

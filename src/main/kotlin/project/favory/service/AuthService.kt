@@ -72,6 +72,40 @@ class AuthService(
         )
     }
 
+    // 토큰 갱신
+    @Transactional(readOnly = true)
+    fun refreshToken(refreshToken: String): LoginResponse {
+
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            throw IllegalArgumentException("유효하지 않은 리프레시 토큰입니다.")
+        }
+
+        if (!jwtTokenProvider.isRefreshToken(refreshToken)) {
+            throw IllegalArgumentException("리프레시 토큰이 아닙니다.")
+        }
+
+        val userId = jwtTokenProvider.getUserId(refreshToken)
+        val emailFromToken = jwtTokenProvider.getEmail(refreshToken)
+
+        val user = userRepository.findById(userId).orElseThrow {
+            IllegalArgumentException("사용자를 찾을 수 없습니다.")
+        }
+
+        if (user.email != emailFromToken) {
+            throw IllegalArgumentException("토큰 정보가 올바르지 않습니다.")
+        }
+
+        val newAccessToken = jwtTokenProvider.generateAccessToken(user.id!!, user.email)
+        val newRefreshToken = jwtTokenProvider.generateRefreshToken(user.id!!, user.email)
+
+        return LoginResponse(
+            accessToken = newAccessToken,
+            refreshToken = newRefreshToken,
+            tokenType = "Bearer",
+            user = user.toAuthResponse()
+        )
+    }
+
     private fun User.toAuthResponse() = UserResponse(
         id = this.id!!,
         email = this.email,
