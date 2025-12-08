@@ -52,4 +52,15 @@ class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body)
     }
+
+    @ExceptionHandler(DuplicateEmailException::class, DuplicateNicknameException::class)
+    fun handleDuplicateField(ex: DuplicateFieldException): ResponseEntity<ErrorResponse> {
+
+        val error = ErrorResponse(
+            message = ex.message,
+            field = ex.field
+        )
+
+        return ResponseEntity.badRequest().body(error)
+    }
 }

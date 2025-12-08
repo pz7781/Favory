@@ -3,6 +3,8 @@ package project.favory.service
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import project.favory.common.exception.DuplicateEmailException
+import project.favory.common.exception.DuplicateNicknameException
 import project.favory.dto.auth.request.LoginRequest
 import project.favory.dto.auth.request.SignupRequest
 import project.favory.dto.auth.response.LoginResponse
@@ -31,10 +33,10 @@ class AuthService(
 
         // 중복체크
         if (userRepository.existsByEmail(req.email)) {
-            throw IllegalArgumentException("이미 사용 중인 이메일입니다.")
+            throw DuplicateEmailException()
         }
         if (userRepository.existsByNickname(req.nickname)) {
-            throw IllegalArgumentException("이미 사용 중인 닉네임입니다.")
+            throw DuplicateNicknameException()
         }
 
         // 비밀번호 암호화
