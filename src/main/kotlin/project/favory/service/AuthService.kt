@@ -1,5 +1,6 @@
 package project.favory.service
 
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -70,6 +71,18 @@ class AuthService(
             tokenType = "Bearer",
             user = user.toAuthResponse()
         )
+    }
+
+    fun getCurrentUserId(): Long {
+        return SecurityContextHolder.getContext().authentication?.details as? Long
+            ?: throw IllegalArgumentException("User not authenticated")
+    }
+
+    fun validateUser(ownerId: Long) {
+        val currentUserId = getCurrentUserId()
+        if (currentUserId != ownerId) {
+            throw IllegalArgumentException("Don't have enough permission")
+        }
     }
 
     private fun User.toAuthResponse() = UserResponse(

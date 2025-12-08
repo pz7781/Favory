@@ -27,7 +27,8 @@ class FavoryService(
     private val mediaRepository: MediaRepository,
     private val commentRepository: CommentRepository,
     private val favoryTagMappingRepository: FavoryTagMappingRepository,
-    private val tagRepository: TagRepository
+    private val tagRepository: TagRepository,
+    private val authService: AuthService
 ) {
 
     @Transactional
@@ -122,6 +123,8 @@ class FavoryService(
             throw IllegalArgumentException("Favory is deleted")
         }
 
+        authService.validateUser(favory.user.id!!)
+
         favory.title = request.title
         favory.content = request.content
 
@@ -153,6 +156,8 @@ class FavoryService(
     fun deleteFavory(id: Long) {
         val favory = favoryRepository.findByIdOrNull(id)
             ?: throw IllegalArgumentException("Favory not found with id: $id")
+
+        authService.validateUser(favory.user.id!!)
 
         favory.deletedAt = LocalDateTime.now()
 
