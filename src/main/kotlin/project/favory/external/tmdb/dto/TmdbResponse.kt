@@ -99,7 +99,8 @@ data class TmdbTvDetail(
     val genres: List<TmdbGenre>,
     @JsonProperty("number_of_seasons")
     val numberOfSeasons: Int,
-    val credits: TmdbCredits?
+    val credits: TmdbCredits?,
+    val networks: List<TmdbNetwork>?
 )
 
 data class TmdbGenre(
@@ -125,4 +126,13 @@ data class TmdbCrew(
     val name: String,
     val job: String,
     val department: String
+)
+
+data class TmdbNetwork(
+    val id: Long,
+    val name: String,
+    @JsonProperty("logo_path")
+    val logoPath: String?,
+    @JsonProperty("origin_country")
+    val originCountry: String
 )

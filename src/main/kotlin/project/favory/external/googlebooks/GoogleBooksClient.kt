@@ -17,6 +17,7 @@ class GoogleBooksClient(
                     .queryParam("q", query)
                     .queryParam("maxResults", maxResults)
                     .queryParam("startIndex", startIndex)
+                    .queryParam("orderBy", "relevance")
                     .build()
             }
             .retrieve()

@@ -32,7 +32,7 @@ class GoogleBooksClientConfig {
             val modifiedRequest = object : HttpRequest by request {
                 override fun getURI() = UriComponentsBuilder.fromUri(request.uri)
                     .queryParam("key", apiKey)
-                    .build()
+                    .build(true)
                     .toUri()
             }
             execution.execute(modifiedRequest, body)
