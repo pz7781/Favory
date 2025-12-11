@@ -3,7 +3,6 @@ package project.favory.service
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import project.favory.common.exception.UserNotFoundException
 import project.favory.dto.user.request.UpdateUserRequest
 import project.favory.dto.user.response.UserResponse
 import project.favory.entity.User
@@ -16,6 +15,7 @@ class UserService (
     private val userRepository: UserRepository
 ){
 
+    // 인증 x -> null
     fun getCurrentUserOrNull(): User? {
         val auth = SecurityContextHolder.getContext().authentication ?: return null
 
@@ -27,9 +27,10 @@ class UserService (
         return userRepository.findByEmail(email)
     }
 
+    // 인증 x -> 예외
     fun getCurrentUserOrThrow(): User {
         return getCurrentUserOrNull()
-            ?: throw UserNotFoundException()
+            ?: throw java.util.NoSuchElementException("사용자를 찾을 수 없습니다.")
     }
 
     // 반복 패턴 캡슐화 - 아이디 존재 확인
