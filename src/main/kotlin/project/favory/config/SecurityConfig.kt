@@ -2,6 +2,7 @@ package project.favory.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -60,6 +61,9 @@ class SecurityConfig(
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/users/**").permitAll()
                     // Favory 조회
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/favories", "/favories/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/users/**").permitAll()
+                    // 검색
+                    .requestMatchers(org.springframework.http.HttpMethod.GET, "/search").permitAll()
                     // 그 외(수정,삭제)는 인증
                     .anyRequest().authenticated()
             }
