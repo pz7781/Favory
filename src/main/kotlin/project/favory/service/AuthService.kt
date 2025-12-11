@@ -1,5 +1,6 @@
 package project.favory.service
 
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -31,10 +32,10 @@ class AuthService(
 
         // 중복체크
         if (userRepository.existsByEmail(req.email)) {
-            throw IllegalArgumentException("이미 사용 중인 이메일입니다.")
+            throw IllegalArgumentException("email:이미 사용 중인 이메일입니다.")
         }
         if (userRepository.existsByNickname(req.nickname)) {
-            throw IllegalArgumentException("이미 사용 중인 닉네임입니다.")
+            throw IllegalArgumentException("nickname:이미 사용 중인 닉네임입니다.")
         }
 
         // 비밀번호 암호화
@@ -67,6 +68,52 @@ class AuthService(
         return LoginResponse(
             accessToken = accessToken,
             refreshToken = refreshToken,
+            tokenType = "Bearer",
+            user = user.toAuthResponse()
+        )
+    }
+
+    fun getCurrentUserId(): Long {
+        return SecurityContextHolder.getContext().authentication?.details as? Long
+            ?: throw IllegalArgumentException("User not authenticated")
+    }
+
+    fun validateUser(ownerId: Long) {
+        val currentUserId = getCurrentUserId()
+        if (currentUserId != ownerId) {
+            throw IllegalArgumentException("Don't have enough permission")
+        }
+    }
+
+    // 토큰 갱신
+    @Transactional(readOnly = true)
+    fun refreshToken(refreshToken: String): LoginResponse {
+
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            throw IllegalArgumentException("유효하지 않은 리프레시 토큰입니다.")
+        }
+
+        if (!jwtTokenProvider.isRefreshToken(refreshToken)) {
+            throw IllegalArgumentException("리프레시 토큰이 아닙니다.")
+        }
+
+        val userId = jwtTokenProvider.getUserId(refreshToken)
+        val emailFromToken = jwtTokenProvider.getEmail(refreshToken)
+
+        val user = userRepository.findById(userId).orElseThrow {
+            IllegalArgumentException("사용자를 찾을 수 없습니다.")
+        }
+
+        if (user.email != emailFromToken) {
+            throw IllegalArgumentException("토큰 정보가 올바르지 않습니다.")
+        }
+
+        val newAccessToken = jwtTokenProvider.generateAccessToken(user.id!!, user.email)
+        val newRefreshToken = jwtTokenProvider.generateRefreshToken(user.id!!, user.email)
+
+        return LoginResponse(
+            accessToken = newAccessToken,
+            refreshToken = newRefreshToken,
             tokenType = "Bearer",
             user = user.toAuthResponse()
         )

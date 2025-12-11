@@ -6,8 +6,10 @@ import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.server.ResponseStatusException
 import project.favory.dto.common.ErrorResponse
 import project.favory.dto.common.FieldErrorDetail
+import java.nio.file.attribute.UserPrincipalNotFoundException
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
@@ -45,9 +47,16 @@ class GlobalExceptionHandler {
         ex: IllegalArgumentException
     ): ResponseEntity<ErrorResponse> {
 
+        val raw = ex.message ?: ""
+        val parts = raw.split(":", limit = 2)
+
+        val field = if(parts.size == 2) parts[0] else null
+        val message = if(parts.size == 2) parts[1] else raw
+
         val body = ErrorResponse(
-            message = ex.message ?: "잘못된 요청입니다.",
-            details = null
+            message = message,
+            details = null,
+            field = field
         )
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body)

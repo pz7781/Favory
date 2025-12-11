@@ -13,6 +13,9 @@ import project.favory.dto.favory.request.UpdateFavoryRequest
 import project.favory.dto.favory.response.FavoryResponse
 import project.favory.dto.favory.response.TagInfo
 import project.favory.entity.Favory
+import project.favory.entity.FavoryTagMapping
+import project.favory.entity.MediaType
+import project.favory.entity.Tag
 import project.favory.repository.*
 import java.time.LocalDateTime
 
@@ -23,7 +26,9 @@ class FavoryService(
     private val userRepository: UserRepository,
     private val mediaRepository: MediaRepository,
     private val commentRepository: CommentRepository,
-    private val favoryTagMappingRepository: FavoryTagMappingRepository
+    private val favoryTagMappingRepository: FavoryTagMappingRepository,
+    private val tagRepository: TagRepository,
+    private val authService: AuthService
 ) {
 
     @Transactional
@@ -43,6 +48,21 @@ class FavoryService(
         )
 
         val savedFavory = favoryRepository.save(favory)
+
+        request.tagNames.forEach { tagName ->
+            val trimmedName = tagName.trim()
+            if (trimmedName.isNotEmpty()) {
+                val tag = tagRepository.findAll().find { it.name == trimmedName }
+                    ?: tagRepository.save(Tag(name = trimmedName))
+
+                val mapping = FavoryTagMapping(
+                    favory = savedFavory,
+                    tag = tag
+                )
+                favoryTagMappingRepository.save(mapping)
+            }
+        }
+
         return savedFavory.toResponse()
     }
 
@@ -57,7 +77,12 @@ class FavoryService(
         return favory.toResponse()
     }
 
-    fun getAllFavories(page: Int = 0, size: Int = 10, sortBy: String = "latest"): PageResponse<FavoryResponse> {
+    fun getAllFavories(
+        page: Int = 0,
+        size: Int = 10,
+        sortBy: String = "latest",
+        type: MediaType? = null
+    ): PageResponse<FavoryResponse> {
         val sort = when (sortBy) {
             "oldest" -> Sort.by(Sort.Direction.ASC, "createdAt")
             else -> Sort.by(Sort.Direction.DESC, "createdAt")
@@ -68,6 +93,7 @@ class FavoryService(
 
         val filteredContent = favoryPage.content
             .filter { it.deletedAt == null }
+            .filter { type == null || it.media.type == type }
             .map { it.toResponse() }
 
         return PageResponse(
@@ -97,8 +123,31 @@ class FavoryService(
             throw IllegalArgumentException("Favory is deleted")
         }
 
+        authService.validateUser(favory.user.id!!)
+
         favory.title = request.title
         favory.content = request.content
+
+        if (request.tagNames != null) {
+            val existingMappings = favoryTagMappingRepository.findAllByFavoryId(id)
+            existingMappings.forEach { favoryTagMappingRepository.delete(it) }
+
+            if (request.tagNames.isNotEmpty()) {
+                request.tagNames.forEach { tagName ->
+                    val trimmedName = tagName.trim()
+                    if (trimmedName.isNotEmpty()) {
+                        val tag = tagRepository.findAll().find { it.name == trimmedName }
+                            ?: tagRepository.save(Tag(name = trimmedName))
+
+                        val mapping = FavoryTagMapping(
+                            favory = favory,
+                            tag = tag
+                        )
+                        favoryTagMappingRepository.save(mapping)
+                    }
+                }
+            }
+        }
 
         return favory.toResponse()
     }
@@ -107,6 +156,8 @@ class FavoryService(
     fun deleteFavory(id: Long) {
         val favory = favoryRepository.findByIdOrNull(id)
             ?: throw IllegalArgumentException("Favory not found with id: $id")
+
+        authService.validateUser(favory.user.id!!)
 
         favory.deletedAt = LocalDateTime.now()
 

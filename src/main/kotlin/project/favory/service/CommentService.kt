@@ -17,7 +17,8 @@ import java.time.LocalDateTime
 class CommentService(
     private val commentRepository: CommentRepository,
     private val favoryRepository: FavoryRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val authService: AuthService
 ) {
 
     @Transactional
@@ -73,6 +74,8 @@ class CommentService(
             throw IllegalArgumentException("Comment is deleted")
         }
 
+        authService.validateUser(comment.user.id!!)
+
         comment.content = request.content
 
         return comment.toResponse()
@@ -83,6 +86,8 @@ class CommentService(
         val comment = commentRepository.findByIdOrNull(id)
             ?: throw IllegalArgumentException("Comment not found with id: $id")
 
+        authService.validateUser(comment.user.id!!)
+
         comment.deletedAt = LocalDateTime.now()
     }
 
@@ -91,6 +96,7 @@ class CommentService(
         favoryId = favory.id!!,
         userId = user.id!!,
         userNickname = user.nickname,
+        userImageUrl = user.profileImageUrl,
         content = content,
         createdAt = createdAt,
         updatedAt = updatedAt,

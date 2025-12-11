@@ -56,11 +56,13 @@ class SecurityConfig(
                     // 에러 페이지
                     .requestMatchers("/error").permitAll()
                     // 회원가입, 로그인, 로그아웃
-                    .requestMatchers("/signup", "/login", "/logout").permitAll()
+                    .requestMatchers("/signup", "/login", "/logout", "/refresh-token").permitAll()
                     // 유저 조회
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/users/**").permitAll()
-                    // 검색 결과 조회
-                    .requestMatchers(HttpMethod.GET, "/search").permitAll()
+                    // Favory 조회
+                    .requestMatchers(org.springframework.http.HttpMethod.GET, "/favories", "/favories/**").permitAll()
+                    // 검색
+                    .requestMatchers(org.springframework.http.HttpMethod.GET, "/search").permitAll()
                     // 그 외(수정,삭제)는 인증
                     .anyRequest().authenticated()
             }
