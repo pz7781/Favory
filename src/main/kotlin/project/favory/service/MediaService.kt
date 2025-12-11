@@ -28,7 +28,7 @@ class MediaService(
     fun createMedia(request: CreateMediaRequest): MediaResponse {
         val media = Media(
             externalId = request.externalId,
-            type = request.type,
+            type = request.mediaType,
             title = request.title,
             creator = request.creator,
             year = request.year,
@@ -89,7 +89,7 @@ class MediaService(
         return MediaResponse(
             id = id!!,
             externalId = externalId,
-            type = type,
+            mediaType = type,
             title = title,
             creator = creator,
             year = year,

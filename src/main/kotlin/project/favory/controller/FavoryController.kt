@@ -7,6 +7,7 @@ import project.favory.dto.common.PageResponse
 import project.favory.dto.favory.request.CreateFavoryRequest
 import project.favory.dto.favory.request.UpdateFavoryRequest
 import project.favory.dto.favory.response.FavoryResponse
+import project.favory.entity.MediaType
 import project.favory.service.FavoryService
 
 @Tag(name = "Favory", description = "Favory 생성/조회/수정/삭제")
@@ -22,14 +23,21 @@ class FavoryController(
         return favoryService.createFavory(request)
     }
 
-    @Operation(summary = "전체 Favory 조회 (페이징, 정렬: latest/oldest)")
+    @Operation(summary = "전체 Favory 조회 (페이징, 정렬: latest/oldest, 타입 필터)")
     @GetMapping
     fun getAllFavories(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "10") size: Int,
-        @RequestParam(defaultValue = "latest") sort: String
+        @RequestParam(defaultValue = "latest") sort: String,
+        @RequestParam(required = false) type: MediaType?
     ): PageResponse<FavoryResponse> {
-        return favoryService.getAllFavories(page, size, sort)
+        return favoryService.getAllFavories(page, size, sort, type)
+    }
+
+    @Operation(summary = "Favory 단건 조회")
+    @GetMapping("/{id}")
+    fun getFavory(@PathVariable id: Long): FavoryResponse {
+        return favoryService.getFavory(id)
     }
 
     @Operation(summary = "미디어별 Favory 조회")

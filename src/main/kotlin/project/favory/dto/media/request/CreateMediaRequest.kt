@@ -4,7 +4,7 @@ import project.favory.entity.MediaType
 
 data class CreateMediaRequest(
     val externalId: String,
-    val type: MediaType,
+    val mediaType: MediaType,
     val title: String,
     val creator: String? = null,
     val year: Int?,

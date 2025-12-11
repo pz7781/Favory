@@ -67,14 +67,12 @@ class MediaSearchService(
 
         return tvShows.mapNotNull { tv ->
             val detail = tmdbService.getTvDetail(tv.id)
-            val creator = detail?.credits?.crew
-                ?.firstOrNull { it.job in listOf("Producer", "Executive Producer", "Creator") }
-                ?.name
+            val network = detail?.networks?.firstOrNull()?.name
             val posterUrl = tmdbService.getPosterUrl(tv.posterPath)
 
             MediaSearchResult(
                 title = tv.name,
-                creator = creator,
+                creator = network,
                 year = extractYearFromDate(tv.firstAirDate),
                 imageUrl = posterUrl,
                 mediaType = MediaType.DRAMA,

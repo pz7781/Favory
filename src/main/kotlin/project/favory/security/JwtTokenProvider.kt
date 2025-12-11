@@ -77,5 +77,21 @@ class JwtTokenProvider (
                 c["typ"] == "access"
             }.getOrDefault(false)
 
+        fun isRefreshToken(token: String) =
+            runCatching {
+                val c = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).payload
+                c["typ"] == "refresh"
+            }.getOrDefault(false)
+
+        fun getUserId(token: String): Long {
+            val claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).payload
+            return (claims["uid"] as Number).toLong()
+        }
+
+        fun getEmail(token: String): String {
+            val claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).payload
+            return claims.subject
+        }
+
         fun getRefreshTokenExpiryMillis(): Long = refreshTokenValidity
     }
