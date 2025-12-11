@@ -32,10 +32,10 @@ class AuthService(
 
         // 중복체크
         if (userRepository.existsByEmail(req.email)) {
-            throw IllegalArgumentException("이미 사용 중인 이메일입니다.")
+            throw IllegalArgumentException("email:이미 사용 중인 이메일입니다.")
         }
         if (userRepository.existsByNickname(req.nickname)) {
-            throw IllegalArgumentException("이미 사용 중인 닉네임입니다.")
+            throw IllegalArgumentException("nickname:이미 사용 중인 닉네임입니다.")
         }
 
         // 비밀번호 암호화
