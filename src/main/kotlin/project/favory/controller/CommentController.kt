@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*
 import project.favory.dto.comment.request.CreateCommentRequest
 import project.favory.dto.comment.request.UpdateCommentRequest
 import project.favory.dto.comment.response.CommentResponse
+import project.favory.dto.common.PageResponse
 import project.favory.service.CommentService
 
 @Tag(name = "Comment", description = "댓글 생성/조회/수정/삭제")
@@ -21,10 +22,15 @@ class CommentController(
         return commentService.createComment(request)
     }
 
-    @Operation(summary = "Favory별 댓글 조회")
+    @Operation(summary = "Favory별 댓글 조회 (페이징, 정렬: latest/oldest)")
     @GetMapping("/favory/{favoryId}")
-    fun getCommentsByFavory(@PathVariable favoryId: Long): List<CommentResponse> {
-        return commentService.getCommentsByFavory(favoryId)
+    fun getCommentsByFavory(
+        @PathVariable favoryId: Long,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "5") size: Int,
+        @RequestParam(defaultValue = "latest") sort: String
+    ): PageResponse<CommentResponse> {
+        return commentService.getCommentsByFavory(favoryId, page, size, sort)
     }
 
     @Operation(summary = "댓글 수정")

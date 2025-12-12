@@ -114,12 +114,10 @@ class SearchService(
 
     // 해시태그
     private fun searchByTag(tag: String, pageable: Pageable): PageResponse<SearchResultItem> {
-        val mappingPage = favoryTagMappingRepository.findByTagNameContainingIgnoreCase(tag, pageable)
+        val mappingPage = favoryTagMappingRepository.findByTagNameContainingAndFavoryNotDeleted(tag, pageable)
         val favoryPage = mappingPage.map { it.favory }
 
-        val content: List<SearchResultItem> = favoryPage.content
-            .filter { it.deletedAt == null }
-            .map { it.toSearchResultItem() }
+        val content: List<SearchResultItem> = favoryPage.content.map { it.toSearchResultItem() }
 
         return PageResponse(
             content = content,
@@ -179,9 +177,7 @@ class SearchService(
                     favoryRepository.findByMedia_TypeAndDeletedAtIsNull(mediaType, pageable)
                 }
 
-            val content = page.content
-                .filter { it.deletedAt == null }
-                .map { it.toSearchResultItem() }
+            val content = page.content.map { it.toSearchResultItem() }
 
             return PageResponse(
                 content = content,
@@ -196,9 +192,7 @@ class SearchService(
         if (tokens.size == 1) {
             val page = favoryRepository.searchCombined(tokens[0], mediaType, pageable)
 
-            val content = page.content
-                .filter { it.deletedAt == null }
-                .map { it.toSearchResultItem() }
+            val content = page.content.map { it.toSearchResultItem() }
 
             return PageResponse(
                 content = content,
@@ -217,7 +211,6 @@ class SearchService(
         )
 
         val candidates = basePage.content
-            .filter { it.deletedAt == null }
 
         val filtered = candidates.filter { favory ->
             val media = favory.media

@@ -7,13 +7,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PatchMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.server.ResponseStatusException
 import project.favory.dto.user.request.UpdateUserRequest
 import project.favory.dto.user.response.UserResponse
@@ -40,7 +35,7 @@ class UserController(
     fun getById(@PathVariable id: Long): ResponseEntity<UserResponse> =
         ResponseEntity.ok(userService.getById(id))
 
-    @Operation(summary = "프로필 수정")
+    @Operation(summary = "프로필 수정 (닉네임, 메시지)")
     @PatchMapping("/{id}")
     @PreAuthorize("#id == authentication.details")
     fun update(
@@ -48,6 +43,17 @@ class UserController(
         @Valid @RequestBody req: UpdateUserRequest
     ): ResponseEntity<UserResponse> =
         ResponseEntity.ok(userService.update(id, req))
+
+    @Operation(summary = "프로필 이미지 업로드")
+    @PutMapping("/{id}/profile-image")
+    @PreAuthorize("#id == authentication.details")
+    fun uploadProfileImage(
+        @PathVariable id: Long,
+        @RequestParam("file") file: MultipartFile
+    ): ResponseEntity<Map<String, String>> {
+        val imageUrl = userService.uploadProfileImage(id, file)
+        return ResponseEntity.ok(mapOf("profileImageUrl" to imageUrl))
+    }
 
     @Operation(summary = "유저 삭제")
     @DeleteMapping("/{id}")
@@ -66,8 +72,10 @@ class UserController(
 
         val email = authentication.name
         if (email.isNullOrBlank()) {
-            throw ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                "인증 정보가 올바르지 않습니다.")
+            throw ResponseStatusException(
+                HttpStatus.UNAUTHORIZED,
+                "인증 정보가 올바르지 않습니다."
+            )
         }
 
         return email

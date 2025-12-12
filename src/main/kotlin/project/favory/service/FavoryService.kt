@@ -89,15 +89,16 @@ class FavoryService(
         }
 
         val pageable: Pageable = PageRequest.of(page, size, sort)
-        val favoryPage: Page<Favory> = favoryRepository.findAll(pageable)
+        val favoryPage: Page<Favory> = if (type != null) {
+            favoryRepository.findByMedia_TypeAndDeletedAtIsNull(type, pageable)
+        } else {
+            favoryRepository.findByDeletedAtIsNull(pageable)
+        }
 
-        val filteredContent = favoryPage.content
-            .filter { it.deletedAt == null }
-            .filter { type == null || it.media.type == type }
-            .map { it.toResponse() }
+        val content = favoryPage.content.map { it.toResponse() }
 
         return PageResponse(
-            content = filteredContent,
+            content = content,
             pageNumber = favoryPage.number,
             pageSize = favoryPage.size,
             totalElements = favoryPage.totalElements,
