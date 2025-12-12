@@ -1,11 +1,16 @@
 package project.favory.service
 
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import project.favory.dto.comment.request.CreateCommentRequest
 import project.favory.dto.comment.request.UpdateCommentRequest
 import project.favory.dto.comment.response.CommentResponse
+import project.favory.dto.common.PageResponse
 import project.favory.entity.Comment
 import project.favory.repository.CommentRepository
 import project.favory.repository.FavoryRepository
@@ -56,13 +61,32 @@ class CommentService(
             .map { it.toResponse() }
     }
 
-    fun getCommentsByFavory(favoryId: Long): List<CommentResponse> {
+    fun getCommentsByFavory(
+        favoryId: Long,
+        page: Int,
+        size: Int,
+        sortBy: String = "latest"
+    ): PageResponse<CommentResponse> {
         favoryRepository.findByIdOrNull(favoryId)
             ?: throw IllegalArgumentException("Favory not found with id: $favoryId")
 
-        return commentRepository.findAllByFavoryId(favoryId)
-            .filter { it.deletedAt == null }
-            .map { it.toResponse() }
+        val sort = when (sortBy) {
+            "oldest" -> Sort.by(Sort.Direction.ASC, "createdAt")
+            else -> Sort.by(Sort.Direction.DESC, "createdAt")
+        }
+
+        val pageable: Pageable = PageRequest.of(page, size, sort)
+        val commentPage: Page<Comment> = commentRepository.findAllByFavoryIdAndDeletedAtIsNull(favoryId, pageable)
+
+        val content = commentPage.content.map { it.toResponse() }
+
+        return PageResponse(
+            content = content,
+            pageNumber = commentPage.number,
+            pageSize = commentPage.size,
+            totalElements = commentPage.totalElements,
+            totalPages = commentPage.totalPages
+        )
     }
 
     @Transactional
