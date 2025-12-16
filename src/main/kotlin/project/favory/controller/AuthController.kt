@@ -3,6 +3,7 @@ package project.favory.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import project.favory.config.swagger.SecurityNotRequired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -21,6 +22,7 @@ class AuthController(
     private val authService: AuthService
 ) {
 
+    @SecurityNotRequired
     @Operation(summary = "회원가입")
     @PostMapping("/signup")
     fun signup(@Valid @RequestBody req: SignupRequest): ResponseEntity<UserResponse> {
@@ -28,6 +30,7 @@ class AuthController(
         return ResponseEntity.status(HttpStatus.CREATED).body(result)
     }
 
+    @SecurityNotRequired
     @Operation(summary = "로그인")
     @PostMapping("/login")
     fun login(@Valid @RequestBody req: LoginRequest): ResponseEntity<LoginResponse> {
@@ -35,6 +38,7 @@ class AuthController(
         return ResponseEntity.ok(token)
     }
 
+    @SecurityNotRequired
     @Operation(summary = "로그아웃")
     @PostMapping("/logout")
     fun logout(): ResponseEntity<String> {
@@ -42,6 +46,7 @@ class AuthController(
         return ResponseEntity.ok("로그아웃 성공")
     }
 
+    @SecurityNotRequired
     @Operation(summary = "리프레시 토큰")
     @PostMapping("/refresh-token")
     fun refresh(@Valid @RequestBody req: RefreshTokenRequest): ResponseEntity<LoginResponse> {

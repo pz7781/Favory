@@ -2,11 +2,15 @@ package project.favory.config
 
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
+import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
+import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.web.method.HandlerMethod
+import project.favory.config.swagger.SecurityNotRequired
 
 @Configuration
 class SwaggerConfig {
@@ -49,5 +53,16 @@ class SwaggerConfig {
             )
             .addSecurityItem(SecurityRequirement().addList(jwtSchemeName))
             .addSecurityItem(SecurityRequirement().addList(devBackdoorSchemeName))
+    }
+
+    @Bean
+    fun operationCustomizer(): OperationCustomizer {
+        return OperationCustomizer { operation: Operation, handlerMethod: HandlerMethod ->
+            val securityNotRequired = handlerMethod.getMethodAnnotation(SecurityNotRequired::class.java)
+            if (securityNotRequired != null) {
+                operation.security = emptyList()
+            }
+            operation
+        }
     }
 }
