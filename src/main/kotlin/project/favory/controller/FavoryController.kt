@@ -3,6 +3,7 @@ package project.favory.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.*
+import project.favory.config.swagger.SecurityNotRequired
 import project.favory.dto.common.PageResponse
 import project.favory.dto.favory.request.CreateFavoryRequest
 import project.favory.dto.favory.request.UpdateFavoryRequest
@@ -23,6 +24,7 @@ class FavoryController(
         return favoryService.createFavory(request)
     }
 
+    @SecurityNotRequired
     @Operation(summary = "전체 Favory 조회 (페이징, 정렬: latest/oldest, 타입 필터)")
     @GetMapping
     fun getAllFavories(
@@ -34,12 +36,14 @@ class FavoryController(
         return favoryService.getAllFavories(page, size, sort, type)
     }
 
+    @SecurityNotRequired
     @Operation(summary = "Favory 단건 조회")
     @GetMapping("/{id}")
     fun getFavory(@PathVariable id: Long): FavoryResponse {
         return favoryService.getFavory(id)
     }
 
+    @SecurityNotRequired
     @Operation(summary = "미디어별 Favory 조회")
     @GetMapping("/media/{mediaId}")
     fun getFavoriesByMedia(@PathVariable mediaId: Long): List<FavoryResponse> {

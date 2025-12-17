@@ -3,6 +3,7 @@ package project.favory.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import project.favory.config.swagger.SecurityNotRequired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -30,6 +31,7 @@ class UserController(
         return ResponseEntity.ok(response)
     }
 
+    @SecurityNotRequired
     @Operation(summary = "유저 조회")
     @GetMapping("/{id}")
     fun getById(@PathVariable id: Long): ResponseEntity<UserResponse> =

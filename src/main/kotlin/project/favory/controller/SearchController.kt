@@ -3,6 +3,7 @@ package project.favory.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.security.core.context.SecurityContextHolder
+import project.favory.config.swagger.SecurityNotRequired
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -22,6 +23,7 @@ class SearchController (
     private val userService: UserService
 ){
 
+    @SecurityNotRequired
     @Operation(summary = "검색 결과 조회")
     @GetMapping
     fun search(
