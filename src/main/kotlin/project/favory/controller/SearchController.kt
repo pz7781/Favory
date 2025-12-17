@@ -6,6 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import project.favory.dto.common.PageResponse
 import project.favory.dto.searchRecent.request.SearchRequest
@@ -25,8 +26,13 @@ class SearchController (
     @Operation(summary = "검색 결과 조회")
     @GetMapping
     fun search(
-        request: SearchRequest
+        @RequestParam keyword: String,
+        @RequestParam(defaultValue = "all") category: String,
+        @RequestParam(defaultValue = "latest") sort: String,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "10") size: Int
     ): PageResponse<*> {
+        val request = SearchRequest(keyword, category, sort, page, size)
         val userId = userService.getCurrentUserOrNull()?.id
         return searchService.search(userId, request)
     }

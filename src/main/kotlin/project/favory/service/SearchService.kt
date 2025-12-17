@@ -7,6 +7,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import project.favory.dto.common.PageResponse
+import project.favory.dto.favory.response.TagInfo
 import project.favory.dto.searchRecent.request.SearchRequest
 import project.favory.dto.searchRecent.response.SearchProfileItem
 import project.favory.dto.searchRecent.response.SearchResultItem
@@ -28,18 +29,18 @@ class SearchService(
 ) {
     fun search(userId: Long?, request: SearchRequest): PageResponse<*> {
         val keyword = request.keyword.trim()
+        val category = request.category.trim().ifBlank { "all" }
+        val sort = request.sort.trim().ifBlank { "latest" }
 
-        // 최근 검색어 저장
-        if (userId != null && keyword.isNotBlank()) {
-            saveRecentSearch(userId, keyword)
-        }
+        val pageable: Pageable = PageRequest.of(request.page, request.size, toSort(sort))
 
-        val pageable: Pageable = PageRequest.of(request.page, request.size, toSort(request.sort))
+        if (keyword.isBlank()) return emptyPage<Any>(pageable)
+
+        if (userId != null) saveRecentSearch(userId, keyword)
 
         return when {
-            // #해시태그
             keyword.startsWith("#") -> {
-                val pureTag = keyword.removePrefix("#")
+                val pureTag = keyword.removePrefix("#").trim()
                 if (pureTag.isBlank()) {
                     emptyPage(pageable)
                 } else {
@@ -47,8 +48,7 @@ class SearchService(
                 }
             }
 
-            // 프로필
-            request.category.equals("PROFILE", ignoreCase = true) -> {
+            category.equals("profile", ignoreCase = true) -> {
                 if (keyword.isBlank()) {
                     emptyPage(pageable)
                 } else {
@@ -56,8 +56,7 @@ class SearchService(
                 }
             }
 
-            // 전체, 카테고리
-            else -> searchMediaAndFavories(keyword, request.category, pageable)
+            else -> searchMediaAndFavories(keyword, category, pageable)
         }
     }
 
@@ -75,7 +74,6 @@ class SearchService(
             else -> Sort.by(Sort.Direction.DESC, "createdAt")
         }
 
-    // 최근 검색어 저장
     @Transactional
     fun saveRecentSearch(userId: Long, keyword: String) {
         val user = userRepository.findByIdOrNull(userId) ?: return
@@ -112,7 +110,6 @@ class SearchService(
         searchRecentRepository.deleteAllByUserId(userId)
     }
 
-    // 해시태그
     private fun searchByTag(tag: String, pageable: Pageable): PageResponse<SearchResultItem> {
         val mappingPage = favoryTagMappingRepository.findByTagNameContainingAndFavoryNotDeleted(tag, pageable)
         val favoryPage = mappingPage.map { it.favory }
@@ -128,7 +125,6 @@ class SearchService(
         )
     }
 
-    // 프로필
     private fun searchProfile(keyword: String, pageable: Pageable): PageResponse<SearchProfileItem> {
         val page = userRepository.findByNicknameContainingIgnoreCase(keyword, pageable)
 
@@ -136,8 +132,8 @@ class SearchService(
             SearchProfileItem(
                 id = user.id!!,
                 nickname = user.nickname,
-                description = user.profileMessage,
-                profileImageUrl = user.profileImageUrl
+                profileImageUrl = user.profileImageUrl,
+                profileMessage = user.profileMessage
             )
         }
 
@@ -150,7 +146,6 @@ class SearchService(
         )
     }
 
-    // 전체
     private fun searchMediaAndFavories(
         keyword: String,
         category: String,
@@ -158,7 +153,7 @@ class SearchService(
     ): PageResponse<SearchResultItem> {
 
         val mediaType: MediaType? =
-            if (category.equals("ALL", ignoreCase = true)) {
+            if (category.equals("all", ignoreCase = true)) {
                 null
             } else {
                 runCatching { MediaType.valueOf(category.uppercase()) }.getOrNull()
@@ -188,7 +183,6 @@ class SearchService(
             )
         }
 
-        // 토큰이 1개일 경우
         if (tokens.size == 1) {
             val page = favoryRepository.searchCombined(tokens[0], mediaType, pageable)
 
@@ -203,7 +197,6 @@ class SearchService(
             )
         }
 
-        // 토큰이 2개 이상인 경우
         val basePage = favoryRepository.searchCombined(
             tokens[0],
             mediaType,
@@ -254,12 +247,24 @@ class SearchService(
 
     private fun Favory.toSearchResultItem() = SearchResultItem(
         id = this.id!!,
-        title = this.media.title,
-        subtitle = this.media.creator ?: "",
-        category = this.media.type.name,
-        reviewTitle = this.title,
-        thumbnailUrl = this.media.imageUrl,
-        createdAt = this.createdAt,
-        tags = favoryTagMappingRepository.findAllByFavoryId(this.id!!).map { it.tag.name }
+        userId = this.user.id!!,
+        userNickname = this.user.nickname,
+        userImageUrl = this.user.profileImageUrl,
+        mediaTitle = this.media.title,
+        mediaCreator = this.media.creator,
+        mediaYear = this.media.year,
+        mediaType = this.media.type.name,
+        mediaImageUrl = this.media.imageUrl,
+        title = this.title,
+        content = this.content,
+        tags = favoryTagMappingRepository
+            .findAllByFavoryId(this.id!!)
+            .map {
+                TagInfo(
+                    id = it.tag.id!!,
+                    name = it.tag.name
+                )
+            },
+        createdAt = this.createdAt
     )
 }
