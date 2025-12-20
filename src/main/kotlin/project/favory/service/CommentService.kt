@@ -15,6 +15,7 @@ import project.favory.entity.Comment
 import project.favory.repository.CommentRepository
 import project.favory.repository.FavoryRepository
 import project.favory.repository.UserRepository
+import project.favory.common.exception.*
 import java.time.LocalDateTime
 
 @Service
@@ -29,10 +30,10 @@ class CommentService(
     @Transactional
     fun createComment(request: CreateCommentRequest): CommentResponse {
         val favory = favoryRepository.findByIdOrNull(request.favoryId)
-            ?: throw IllegalArgumentException("Favory not found with id: ${request.favoryId}")
+            ?: throw NotFoundException(ErrorCode.FAVORY_NOT_FOUND)
 
         val user = userRepository.findByIdOrNull(request.userId)
-            ?: throw IllegalArgumentException("User not found with id: ${request.userId}")
+            ?: throw NotFoundException(ErrorCode.USER_NOT_FOUND)
 
         val comment = Comment(
             favory = favory,
@@ -46,10 +47,10 @@ class CommentService(
 
     fun getComment(id: Long): CommentResponse {
         val comment = commentRepository.findByIdOrNull(id)
-            ?: throw IllegalArgumentException("Comment not found with id: $id")
+            ?: throw NotFoundException(ErrorCode.COMMENT_NOT_FOUND)
 
         if (comment.deletedAt != null) {
-            throw IllegalArgumentException("Comment is deleted")
+            throw NotFoundException(ErrorCode.COMMENT_DELETED)
         }
 
         return comment.toResponse()
@@ -68,7 +69,7 @@ class CommentService(
         sortBy: String = "latest"
     ): PageResponse<CommentResponse> {
         favoryRepository.findByIdOrNull(favoryId)
-            ?: throw IllegalArgumentException("Favory not found with id: $favoryId")
+            ?: throw NotFoundException(ErrorCode.FAVORY_NOT_FOUND)
 
         val sort = when (sortBy) {
             "oldest" -> Sort.by(Sort.Direction.ASC, "createdAt")
@@ -92,10 +93,10 @@ class CommentService(
     @Transactional
     fun updateComment(id: Long, request: UpdateCommentRequest): CommentResponse {
         val comment = commentRepository.findByIdOrNull(id)
-            ?: throw IllegalArgumentException("Comment not found with id: $id")
+            ?: throw NotFoundException(ErrorCode.COMMENT_NOT_FOUND)
 
         if (comment.deletedAt != null) {
-            throw IllegalArgumentException("Comment is deleted")
+            throw NotFoundException(ErrorCode.COMMENT_DELETED)
         }
 
         authService.validateUser(comment.user.id!!)
@@ -108,7 +109,7 @@ class CommentService(
     @Transactional
     fun deleteComment(id: Long) {
         val comment = commentRepository.findByIdOrNull(id)
-            ?: throw IllegalArgumentException("Comment not found with id: $id")
+            ?: throw NotFoundException(ErrorCode.COMMENT_NOT_FOUND)
 
         authService.validateUser(comment.user.id!!)
 

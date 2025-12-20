@@ -11,6 +11,7 @@ import project.favory.dto.auth.response.UserResponse
 import project.favory.entity.User
 import project.favory.repository.UserRepository
 import project.favory.security.JwtTokenProvider
+import project.favory.common.exception.*
 
 // 회원가입, 로그인, JWT 발급
 
@@ -27,15 +28,15 @@ class AuthService(
 
         // 비밀번호 확인 일치 체크
         if (req.password != req.passwordConfirmation) {
-            throw IllegalArgumentException("비밀번호가 일치하지 않습니다.")
+            throw BadRequestException(ErrorCode.PASSWORD_MISMATCH)
         }
 
         // 중복체크
         if (userRepository.existsByEmail(req.email)) {
-            throw IllegalArgumentException("email:이미 사용 중인 이메일입니다.")
+            throw BadRequestException(ErrorCode.DUPLICATE_EMAIL, field = "email")
         }
         if (userRepository.existsByNickname(req.nickname)) {
-            throw IllegalArgumentException("nickname:이미 사용 중인 닉네임입니다.")
+            throw BadRequestException(ErrorCode.DUPLICATE_NICKNAME, field = "nickname")
         }
 
         // 비밀번호 암호화
@@ -56,10 +57,10 @@ class AuthService(
     @Transactional(readOnly = true)
     fun login(req: LoginRequest): LoginResponse {
         val user = userRepository.findByEmail(req.email)
-            ?: throw IllegalArgumentException("이메일이 올바르지 않습니다.")
+            ?: throw UnauthorizedException(ErrorCode.INVALID_EMAIL)
 
         if (!passwordEncoder.matches(req.password, user.password)) {
-            throw IllegalArgumentException("비밀번호가 올바르지 않습니다.")
+            throw UnauthorizedException(ErrorCode.INVALID_PASSWORD)
         }
 
         val accessToken = jwtTokenProvider.generateAccessToken(user.id!!, user.email)
@@ -75,13 +76,13 @@ class AuthService(
 
     fun getCurrentUserId(): Long {
         return SecurityContextHolder.getContext().authentication?.details as? Long
-            ?: throw IllegalArgumentException("User not authenticated")
+            ?: throw UnauthorizedException(ErrorCode.NOT_AUTHENTICATED)
     }
 
     fun validateUser(ownerId: Long) {
         val currentUserId = getCurrentUserId()
         if (currentUserId != ownerId) {
-            throw IllegalArgumentException("Don't have enough permission")
+            throw ForbiddenException(ErrorCode.ACCESS_DENIED)
         }
     }
 
@@ -90,22 +91,22 @@ class AuthService(
     fun refreshToken(refreshToken: String): LoginResponse {
 
         if (!jwtTokenProvider.validateToken(refreshToken)) {
-            throw IllegalArgumentException("유효하지 않은 리프레시 토큰입니다.")
+            throw UnauthorizedException(ErrorCode.INVALID_REFRESH_TOKEN)
         }
 
         if (!jwtTokenProvider.isRefreshToken(refreshToken)) {
-            throw IllegalArgumentException("리프레시 토큰이 아닙니다.")
+            throw UnauthorizedException(ErrorCode.NOT_REFRESH_TOKEN)
         }
 
         val userId = jwtTokenProvider.getUserId(refreshToken)
         val emailFromToken = jwtTokenProvider.getEmail(refreshToken)
 
         val user = userRepository.findById(userId).orElseThrow {
-            IllegalArgumentException("사용자를 찾을 수 없습니다.")
+            NotFoundException(ErrorCode.USER_NOT_FOUND)
         }
 
         if (user.email != emailFromToken) {
-            throw IllegalArgumentException("토큰 정보가 올바르지 않습니다.")
+            throw UnauthorizedException(ErrorCode.INVALID_TOKEN_INFO)
         }
 
         val newAccessToken = jwtTokenProvider.generateAccessToken(user.id!!, user.email)

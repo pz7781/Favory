@@ -17,6 +17,7 @@ import project.favory.entity.FavoryTagMapping
 import project.favory.entity.MediaType
 import project.favory.entity.Tag
 import project.favory.repository.*
+import project.favory.common.exception.*
 import java.time.LocalDateTime
 
 @Service
@@ -34,10 +35,10 @@ class FavoryService(
     @Transactional
     fun createFavory(request: CreateFavoryRequest): FavoryResponse {
         val user = userRepository.findByIdOrNull(request.userId)
-            ?: throw IllegalArgumentException("User not found with id: ${request.userId}")
+            ?: throw NotFoundException(ErrorCode.USER_NOT_FOUND)
 
         val media = mediaRepository.findByIdOrNull(request.mediaId)
-            ?: throw IllegalArgumentException("Media not found with id: ${request.mediaId}")
+            ?: throw NotFoundException(ErrorCode.MEDIA_NOT_FOUND)
 
         val favory = Favory(
             user = user,
@@ -68,10 +69,10 @@ class FavoryService(
 
     fun getFavory(id: Long): FavoryResponse {
         val favory = favoryRepository.findByIdOrNull(id)
-            ?: throw IllegalArgumentException("Favory not found with id: $id")
+            ?: throw NotFoundException(ErrorCode.FAVORY_NOT_FOUND)
 
         if (favory.deletedAt != null) {
-            throw IllegalArgumentException("Favory is deleted")
+            throw NotFoundException(ErrorCode.FAVORY_DELETED)
         }
 
         return favory.toResponse()
@@ -108,7 +109,7 @@ class FavoryService(
 
     fun getFavoriesByMedia(mediaId: Long): List<FavoryResponse> {
         mediaRepository.findByIdOrNull(mediaId)
-            ?: throw IllegalArgumentException("Media not found with id: $mediaId")
+            ?: throw NotFoundException(ErrorCode.MEDIA_NOT_FOUND)
 
         return favoryRepository.findAll()
             .filter { it.media.id == mediaId && it.deletedAt == null }
@@ -118,10 +119,10 @@ class FavoryService(
     @Transactional
     fun updateFavory(id: Long, request: UpdateFavoryRequest): FavoryResponse {
         val favory = favoryRepository.findByIdOrNull(id)
-            ?: throw IllegalArgumentException("Favory not found with id: $id")
+            ?: throw NotFoundException(ErrorCode.FAVORY_NOT_FOUND)
 
         if (favory.deletedAt != null) {
-            throw IllegalArgumentException("Favory is deleted")
+            throw NotFoundException(ErrorCode.FAVORY_DELETED)
         }
 
         authService.validateUser(favory.user.id!!)
@@ -156,7 +157,7 @@ class FavoryService(
     @Transactional
     fun deleteFavory(id: Long) {
         val favory = favoryRepository.findByIdOrNull(id)
-            ?: throw IllegalArgumentException("Favory not found with id: $id")
+            ?: throw NotFoundException(ErrorCode.FAVORY_NOT_FOUND)
 
         authService.validateUser(favory.user.id!!)
 
