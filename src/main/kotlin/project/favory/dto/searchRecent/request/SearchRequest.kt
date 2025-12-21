@@ -1,9 +1,9 @@
 package project.favory.dto.searchRecent.request
 
-class SearchRequest(
+data class SearchRequest(
     val keyword: String,
-    val category: String = "ALL", // ALL, MUSIC, MOVIE, DRAMA, BOOK, PROFILE
-    val sort: String = "LATEST", // LATEST, OLDEST
+    val category: String = "all", // all, music, movie, drama, book, profile
+    val sort: String = "latest", // latest, oldest
     val page: Int = 0,
     val size: Int = 10
 ) {
