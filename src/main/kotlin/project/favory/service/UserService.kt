@@ -8,6 +8,7 @@ import project.favory.dto.user.request.UpdateUserRequest
 import project.favory.dto.user.response.UserResponse
 import project.favory.entity.User
 import project.favory.repository.UserRepository
+import project.favory.common.exception.*
 
 @Service
 class UserService(
@@ -28,23 +29,23 @@ class UserService(
 
     fun getCurrentUserOrThrow(): User {
         return getCurrentUserOrNull()
-            ?: throw java.util.NoSuchElementException("사용자를 찾을 수 없습니다.")
+            ?: throw NotFoundException(ErrorCode.USER_NOT_FOUND)
     }
 
     private fun findByIdOrThrow(id: Long): User =
-        userRepository.findById(id).orElseThrow { NoSuchElementException("사용자를 찾을 수 없습니다.") }
+        userRepository.findById(id).orElseThrow { NotFoundException(ErrorCode.USER_NOT_FOUND) }
 
     @Transactional(readOnly = true)
     fun getByNickname(nickname: String): UserResponse =
         userRepository.findByNickname(nickname)
             ?.toResponse()
-            ?: throw NoSuchElementException("사용자를 찾을 수 없습니다.")
+            ?: throw NotFoundException(ErrorCode.USER_NOT_FOUND)
 
     @Transactional(readOnly = true)
     fun getByEmail(email: String): UserResponse =
         userRepository.findByEmail(email)
             ?.toResponse()
-            ?: throw NoSuchElementException("사용자를 찾을 수 없습니다.")
+            ?: throw NotFoundException(ErrorCode.USER_NOT_FOUND)
 
     @Transactional(readOnly = true)
     fun getById(id: Long): UserResponse =
@@ -57,7 +58,7 @@ class UserService(
         req.nickname?.let { newNick ->
             if (newNick.isNotBlank() && newNick != user.nickname) {
                 if (userRepository.existsByNickname(newNick)) {
-                    throw IllegalArgumentException("이미 사용 중인 닉네임입니다.")
+                    throw BadRequestException(ErrorCode.DUPLICATE_NICKNAME, field = "nickname")
                 }
                 user.nickname = newNick
             }

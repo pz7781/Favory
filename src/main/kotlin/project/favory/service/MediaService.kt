@@ -10,6 +10,7 @@ import project.favory.dto.media.response.MediaResponse
 import project.favory.entity.Media
 import project.favory.entity.MediaType
 import project.favory.repository.MediaRepository
+import project.favory.common.exception.*
 
 @Service
 @Transactional(readOnly = true)
@@ -42,7 +43,7 @@ class MediaService(
 
     fun getMedia(id: Long): MediaResponse {
         val media = mediaRepository.findByIdOrNull(id)
-            ?: throw IllegalArgumentException("Media not found with id: $id")
+            ?: throw NotFoundException(ErrorCode.MEDIA_NOT_FOUND)
 
         return media.toResponse()
     }
@@ -67,7 +68,7 @@ class MediaService(
     @Transactional
     fun updateMedia(id: Long, request: UpdateMediaRequest): MediaResponse {
         val media = mediaRepository.findByIdOrNull(id)
-            ?: throw IllegalArgumentException("Media not found with id: $id")
+            ?: throw NotFoundException(ErrorCode.MEDIA_NOT_FOUND)
 
         media.title = request.title
         media.creator = request.creator
@@ -80,7 +81,7 @@ class MediaService(
     @Transactional
     fun deleteMedia(id: Long) {
         val media = mediaRepository.findByIdOrNull(id)
-            ?: throw IllegalArgumentException("Media not found with id: $id")
+            ?: throw NotFoundException(ErrorCode.MEDIA_NOT_FOUND)
 
         mediaRepository.delete(media)
     }

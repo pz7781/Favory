@@ -10,8 +10,8 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import org.springframework.web.server.ResponseStatusException
 import project.favory.dto.user.request.UpdateUserRequest
+import project.favory.common.exception.*
 import project.favory.dto.user.response.UserResponse
 import project.favory.service.UserService
 
@@ -67,17 +67,11 @@ class UserController(
 
     private fun getCurrentUserEmail(): String {
         val authentication = SecurityContextHolder.getContext().authentication
-            ?: throw ResponseStatusException(
-                HttpStatus.UNAUTHORIZED,
-                "인증 정보가 없습니다."
-            )
+            ?: throw UnauthorizedException(ErrorCode.NOT_AUTHENTICATED)
 
         val email = authentication.name
         if (email.isNullOrBlank()) {
-            throw ResponseStatusException(
-                HttpStatus.UNAUTHORIZED,
-                "인증 정보가 올바르지 않습니다."
-            )
+            throw UnauthorizedException(ErrorCode.INVALID_TOKEN_INFO)
         }
 
         return email
