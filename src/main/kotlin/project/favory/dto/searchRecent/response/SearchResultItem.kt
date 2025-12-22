@@ -8,6 +8,7 @@ class SearchResultItem(
     val userId: Long,
     val userNickname: String,
     val userImageUrl: String?,
+    val mediaId: Long,
     val mediaTitle: String,
     val mediaCreator: String?, // 가수, 감독, 방송사, 작가
     val mediaYear: Int?,
@@ -16,6 +17,8 @@ class SearchResultItem(
     val title: String?,
     val content: String,
     val tags: List<TagInfo>,
-    val createdAt: LocalDateTime
+    val createdAt: LocalDateTime,
+    val updatedAt: LocalDateTime,
+    val deletedAt: LocalDateTime?
 ) {
 }
