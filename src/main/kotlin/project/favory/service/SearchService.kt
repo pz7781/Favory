@@ -250,6 +250,7 @@ class SearchService(
         userId = this.user.id!!,
         userNickname = this.user.nickname,
         userImageUrl = this.user.profileImageUrl,
+        mediaId = this.media.id!!,
         mediaTitle = this.media.title,
         mediaCreator = this.media.creator,
         mediaYear = this.media.year,
@@ -265,6 +266,8 @@ class SearchService(
                     name = it.tag.name
                 )
             },
-        createdAt = this.createdAt
+        createdAt = this.createdAt,
+        updatedAt = this.updatedAt,
+        deletedAt = this.deletedAt
     )
 }
