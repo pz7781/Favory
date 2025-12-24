@@ -44,7 +44,7 @@ class SearchService(
                 if (pureTag.isBlank()) {
                     emptyPage(pageable)
                 } else {
-                    searchByTag(pureTag, pageable)
+                    searchByTag(pureTag, category, pageable)
                 }
             }
 
@@ -110,10 +110,19 @@ class SearchService(
         searchRecentRepository.deleteAllByUserId(userId)
     }
 
-    private fun searchByTag(tag: String, pageable: Pageable): PageResponse<SearchResultItem> {
-        val mappingPage = favoryTagMappingRepository.findByTagNameContainingAndFavoryNotDeleted(tag, pageable)
-        val favoryPage = mappingPage.map { it.favory }
+    private fun searchByTag(tag: String, category: String, pageable: Pageable): PageResponse<SearchResultItem> {
+        val mediaType: MediaType? =
+            if (category.equals("all", ignoreCase = true)) null
+            else runCatching { MediaType.valueOf(category.uppercase()) }.getOrNull()
 
+        val mappingPage =
+            if (mediaType == null) {
+                favoryTagMappingRepository.findByTagNameContainingAndFavoryNotDeleted(tag, pageable)
+            } else {
+                favoryTagMappingRepository.findByTagNameAndMediaType(tag, mediaType, pageable)
+            }
+
+        val favoryPage = mappingPage.map { it.favory }
         val content: List<SearchResultItem> = favoryPage.content.map { it.toSearchResultItem() }
 
         return PageResponse(
@@ -159,7 +168,6 @@ class SearchService(
                 runCatching { MediaType.valueOf(category.uppercase()) }.getOrNull()
             }
 
-        // 토큰 분리
         val tokens = keyword.trim()
             .split(Regex("\\s+"))
             .filter { it.isNotBlank() }
