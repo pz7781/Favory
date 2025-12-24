@@ -12,6 +12,7 @@ enum class ErrorCode(
     PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, 40002, "비밀번호가 일치하지 않습니다."),
     DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, 40003, "이미 사용 중인 이메일입니다."),
     DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST, 40004, "이미 사용 중인 닉네임입니다."),
+    OAUTH_EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, 40005, "이미 이 이메일로 가입된 계정이 있습니다."),
 
     // 401 Unauthorized
     INVALID_EMAIL(HttpStatus.UNAUTHORIZED, 40101, "이메일이 올바르지 않습니다."),
@@ -20,6 +21,7 @@ enum class ErrorCode(
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, 40104, "유효하지 않은 리프레시 토큰입니다."),
     NOT_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, 40105, "리프레시 토큰이 아닙니다."),
     INVALID_TOKEN_INFO(HttpStatus.UNAUTHORIZED, 40106, "토큰 정보가 올바르지 않습니다."),
+    INVALID_OAUTH_TOKEN(HttpStatus.UNAUTHORIZED, 40107, "유효하지 않은 소셜 로그인 토큰입니다."),
 
     // 403 Forbidden
     ACCESS_DENIED(HttpStatus.FORBIDDEN, 40301, "접근 권한이 없습니다."),
