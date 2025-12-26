@@ -7,6 +7,7 @@ import project.favory.dto.comment.request.CreateCommentRequest
 import project.favory.dto.comment.request.UpdateCommentRequest
 import project.favory.dto.comment.response.CommentResponse
 import project.favory.dto.common.PageResponse
+import project.favory.config.swagger.SecurityNotRequired
 import project.favory.service.CommentService
 
 @Tag(name = "Comment", description = "댓글 생성/조회/수정/삭제")
@@ -22,6 +23,7 @@ class CommentController(
         return commentService.createComment(request)
     }
 
+    @SecurityNotRequired
     @Operation(summary = "Favory별 댓글 조회 (페이징, 정렬: latest/oldest)")
     @GetMapping("/favory/{favoryId}")
     fun getCommentsByFavory(
