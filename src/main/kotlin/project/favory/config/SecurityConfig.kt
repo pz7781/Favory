@@ -61,6 +61,8 @@ class SecurityConfig(
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/users/**").permitAll()
                     // Favory 조회
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/favories", "/favories/**").permitAll()
+                    // 댓글 조회
+                    .requestMatchers(org.springframework.http.HttpMethod.GET, "/comments/**").permitAll()
                     // 검색
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/search").permitAll()
                     // 그 외(수정,삭제)는 인증
