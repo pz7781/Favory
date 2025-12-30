@@ -56,7 +56,7 @@ class SecurityConfig(
                     // 에러 페이지
                     .requestMatchers("/error").permitAll()
                     // 회원가입, 로그인, 로그아웃
-                    .requestMatchers("/signup", "/login", "/logout", "/refresh-token").permitAll()
+                    .requestMatchers("/signup", "/login/**", "/refresh-token").permitAll()
                     // 유저 조회
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/users/**").permitAll()
                     // Favory 조회

@@ -12,6 +12,9 @@ import project.favory.entity.User
 import project.favory.repository.UserRepository
 import project.favory.security.JwtTokenProvider
 import project.favory.common.exception.*
+import project.favory.entity.AuthProvider
+import project.favory.security.oauth.GoogleTokenVerifier
+import java.util.UUID
 
 // 회원가입, 로그인, JWT 발급
 
@@ -19,19 +22,18 @@ import project.favory.common.exception.*
 class AuthService(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val jwtTokenProvider: JwtTokenProvider
+    private val jwtTokenProvider: JwtTokenProvider,
+    private val googleTokenVerifier: GoogleTokenVerifier
 ) {
 
     // 회원가입
     @Transactional
     fun signup(req: SignupRequest): UserResponse {
 
-        // 비밀번호 확인 일치 체크
         if (req.password != req.passwordConfirmation) {
             throw BadRequestException(ErrorCode.PASSWORD_MISMATCH)
         }
 
-        // 중복체크
         if (userRepository.existsByEmail(req.email)) {
             throw BadRequestException(ErrorCode.DUPLICATE_EMAIL, field = "email")
         }
@@ -39,10 +41,8 @@ class AuthService(
             throw BadRequestException(ErrorCode.DUPLICATE_NICKNAME, field = "nickname")
         }
 
-        // 비밀번호 암호화
         val encoded = passwordEncoder.encode(req.password)
 
-        // 저장
         val saved = userRepository.save(
             User(
                 email = req.email,
@@ -74,16 +74,53 @@ class AuthService(
         )
     }
 
-    fun getCurrentUserId(): Long {
-        return SecurityContextHolder.getContext().authentication?.details as? Long
-            ?: throw UnauthorizedException(ErrorCode.NOT_AUTHENTICATED)
+    @Transactional
+    fun oauthLogin(provider: AuthProvider, token: String): LoginResponse {
+        return when (provider) {
+            AuthProvider.GOOGLE -> googleLogin(token)
+            AuthProvider.LOCAL -> throw BadRequestException(ErrorCode.INVALID_INPUT)
+        }
     }
 
-    fun validateUser(ownerId: Long) {
-        val currentUserId = getCurrentUserId()
-        if (currentUserId != ownerId) {
-            throw ForbiddenException(ErrorCode.ACCESS_DENIED)
+    @Transactional
+    fun googleLogin(idToken: String): LoginResponse {
+        val info = runCatching { googleTokenVerifier.verify(idToken) }
+            .getOrElse {
+                throw UnauthorizedException(ErrorCode.INVALID_OAUTH_TOKEN)
+            }
+
+        val userByProvider = userRepository.findByProviderAndProviderId(AuthProvider.GOOGLE, info.sub)
+        val user = when {
+            userByProvider != null -> userByProvider
+
+            userRepository.existsByEmail(info.email) -> {
+                throw BadRequestException(ErrorCode.OAUTH_EMAIL_ALREADY_EXISTS)
+            }
+
+            else -> {
+                val nickname = generateUniqueNickname(info.name, info.email)
+                userRepository.save(
+                    User(
+                        email = info.email,
+                        password = passwordEncoder.encode(UUID.randomUUID().toString()),
+                        provider = AuthProvider.GOOGLE,
+                        providerId = info.sub,
+                        nickname = nickname,
+                        profileImageUrl = info.picture
+                    )
+                )
+            }
         }
+
+        val accessToken = jwtTokenProvider.generateAccessToken(user.id!!, user.email)
+        val refreshToken = jwtTokenProvider.generateRefreshToken(user.id!!, user.email)
+
+        return LoginResponse(
+            accessToken = accessToken,
+            refreshToken = refreshToken,
+            tokenType = "Bearer",
+            user = user.toAuthResponse()
+        )
     }
 
     // 토큰 갱신
@@ -118,6 +155,32 @@ class AuthService(
             tokenType = "Bearer",
             user = user.toAuthResponse()
         )
+    }
+
+    fun getCurrentUserId(): Long {
+        return SecurityContextHolder.getContext().authentication?.details as? Long
+            ?: throw UnauthorizedException(ErrorCode.NOT_AUTHENTICATED)
+    }
+
+    fun validateUser(ownerId: Long) {
+        val currentUserId = getCurrentUserId()
+        if (currentUserId != ownerId) {
+            throw ForbiddenException(ErrorCode.ACCESS_DENIED)
+        }
+    }
+    private fun generateUniqueNickname(name: String?, email: String): String {
+        val base = (name?.trim().takeIf { !it.isNullOrBlank() }
+            ?: email.substringBefore("@")).take(20)
+
+        var candidate = base
+        var i = 1
+        while (userRepository.existsByNickname(candidate)) {
+            candidate = "${base}_${i++}"
+            if (candidate.length > 50) {
+                candidate = candidate.take(50)
+            }
+        }
+        return candidate
     }
 
     private fun User.toAuthResponse() = UserResponse(
