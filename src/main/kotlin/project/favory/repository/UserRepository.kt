@@ -3,6 +3,7 @@ package project.favory.repository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import project.favory.entity.AuthProvider
 import project.favory.entity.User
 
 interface UserRepository : JpaRepository<User, Long> {
@@ -11,4 +12,5 @@ interface UserRepository : JpaRepository<User, Long> {
     fun existsByEmail(email: String): Boolean
     fun existsByNickname(nickname: String): Boolean
     fun findByNicknameContainingIgnoreCase(nickname: String, pageable: Pageable): Page<User>
+    fun findByProviderAndProviderId(provider: AuthProvider, providerId: String): User?
 }

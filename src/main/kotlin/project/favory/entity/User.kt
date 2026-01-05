@@ -15,6 +15,13 @@ class User(
     @Column(nullable = false)
     val password: String,
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    val provider: AuthProvider = AuthProvider.LOCAL,
+
+    @Column(name = "provider_id", length = 100, nullable = true)
+    val providerId: String? = null,
+
     @Column(length = 50, nullable = false)
     var nickname: String,
 
@@ -24,3 +31,7 @@ class User(
     @Column(columnDefinition = "TEXT", nullable = true)
     var profileMessage: String? = null
 ) : AbstractTimeEntity()
+
+enum class AuthProvider {
+    LOCAL, GOOGLE
+}

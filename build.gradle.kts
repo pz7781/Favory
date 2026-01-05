@@ -50,6 +50,11 @@ dependencies {
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security
     implementation("org.springframework.boot:spring-boot-starter-security:3.5.7")
+    // https://mvnrepository.com/artifact/com.google.api-client/google-api-client
+    implementation("com.google.api-client:google-api-client:2.8.1")
+    // https://mvnrepository.com/artifact/com.google.http-client/google-http-client-jackson2
+    implementation("com.google.http-client:google-http-client-jackson2:2.0.3")
+
 
     // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
     implementation("io.jsonwebtoken:jjwt-api:0.13.0")
