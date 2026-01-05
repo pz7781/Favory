@@ -13,9 +13,9 @@ import java.time.LocalDateTime
 abstract class AbstractTimeEntity(
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: LocalDateTime? = null,
 
     @UpdateTimestamp
     @Column(nullable = false)
-    var updatedAt: LocalDateTime = LocalDateTime.now()
+    var updatedAt: LocalDateTime? = null
 )
