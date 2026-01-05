@@ -5,8 +5,11 @@ CREATE TABLE users (
     nickname VARCHAR(50) NOT NULL,
     profile_image_url VARCHAR(500),
     profile_message TEXT,
+    provider VARCHAR(30),
+    provider_id VARCHAR(255),
     created_at TIMESTAMP(6) NOT NULL,
-    updated_at TIMESTAMP(6) NOT NULL
+    updated_at TIMESTAMP(6) NOT NULL,
+    CONSTRAINT uk_users_provider_provider_id UNIQUE (provider, provider_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE tags (

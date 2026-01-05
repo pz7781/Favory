@@ -3,14 +3,7 @@ package project.favory.entity
 import jakarta.persistence.*
 
 @Entity
-@Table(name = "users",
-    uniqueConstraints = [
-        UniqueConstraint(
-            name = "uk_users_provider_provider_id",
-            columnNames = ["provider", "provider_id"]
-        )
-    ]
-)
+@Table(name = "users")
 class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
