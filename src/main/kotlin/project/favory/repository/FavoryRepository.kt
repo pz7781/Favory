@@ -36,4 +36,12 @@ interface FavoryRepository : JpaRepository<Favory, Long> {
         type: MediaType,
         pageable: Pageable
     ): Page<Favory>
+
+    fun findByUserIdAndDeletedAtIsNull(userId: Long, pageable: Pageable): Page<Favory>
+
+    fun findByUserIdAndMedia_TypeAndDeletedAtIsNull(
+        userId: Long,
+        type: MediaType,
+        pageable: Pageable
+    ): Page<Favory>
 }
