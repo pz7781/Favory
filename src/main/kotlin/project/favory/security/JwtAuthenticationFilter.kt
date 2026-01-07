@@ -24,7 +24,6 @@ class JwtAuthenticationFilter(
     private val isProductionMode: Boolean
         get() = environment.activeProfiles.contains("prod")
 
-    // 토큰 검사 제외 경로
     private val whiteListPrefixes = listOf(
         "/login", "/signup",
         "/swagger-ui", "/v3/api-docs", "/error"

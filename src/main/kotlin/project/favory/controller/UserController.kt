@@ -3,15 +3,11 @@ package project.favory.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import project.favory.config.swagger.SecurityNotRequired
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import project.favory.dto.user.request.UpdateUserRequest
-import project.favory.common.exception.*
 import project.favory.dto.user.response.UserResponse
 import project.favory.service.UserService
 
@@ -24,18 +20,18 @@ class UserController(
 
     @Operation(summary = "내 정보 조회")
     @GetMapping("/me")
-    @PreAuthorize("isAuthenticated()")
-    fun getMe(): ResponseEntity<UserResponse> {
-        val email = getCurrentUserEmail()
-        val response = userService.getByEmail(email)
-        return ResponseEntity.ok(response)
-    }
+    fun getMe(): ResponseEntity<UserResponse> =
+        ResponseEntity.ok(userService.getMe())
 
-    @SecurityNotRequired
-    @Operation(summary = "유저 조회")
+    @Operation(summary = "id 기반 프로필 조회")
     @GetMapping("/{id}")
     fun getById(@PathVariable id: Long): ResponseEntity<UserResponse> =
         ResponseEntity.ok(userService.getById(id))
+
+    @Operation(summary = "닉네임 기반 프로필 조회")
+    @GetMapping("/profile/{nickname}")
+    fun getByNickname(@PathVariable nickname: String): ResponseEntity<UserResponse> =
+        ResponseEntity.ok(userService.getByNickname(nickname))
 
     @Operation(summary = "프로필 수정 (닉네임, 메시지)")
     @PatchMapping("/{id}")
@@ -63,17 +59,5 @@ class UserController(
     fun delete(@PathVariable id: Long): ResponseEntity<Void> {
         userService.delete(id)
         return ResponseEntity.noContent().build()
-    }
-
-    private fun getCurrentUserEmail(): String {
-        val authentication = SecurityContextHolder.getContext().authentication
-            ?: throw UnauthorizedException(ErrorCode.NOT_AUTHENTICATED)
-
-        val email = authentication.name
-        if (email.isNullOrBlank()) {
-            throw UnauthorizedException(ErrorCode.INVALID_TOKEN_INFO)
-        }
-
-        return email
     }
 }
