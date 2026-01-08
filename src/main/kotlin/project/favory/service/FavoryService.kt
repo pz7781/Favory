@@ -171,6 +171,37 @@ class FavoryService(
         }
     }
 
+    fun getMyFavories(
+        page: Int = 0,
+        size: Int = 10,
+        sortBy: String = "latest",
+        type: MediaType? = null
+    ): PageResponse<FavoryResponse> {
+        val userId = authService.getCurrentUserId()
+
+        val sort = when (sortBy) {
+            "oldest" -> Sort.by(Sort.Direction.ASC, "createdAt")
+            else -> Sort.by(Sort.Direction.DESC, "createdAt")
+        }
+
+        val pageable: Pageable = PageRequest.of(page, size, sort)
+        val favoryPage: Page<Favory> = if (type != null) {
+            favoryRepository.findByUserIdAndMedia_TypeAndDeletedAtIsNull(userId, type, pageable)
+        } else {
+            favoryRepository.findByUserIdAndDeletedAtIsNull(userId, pageable)
+        }
+
+        val content = favoryPage.content.map { it.toResponse() }
+
+        return PageResponse(
+            content = content,
+            pageNumber = favoryPage.number,
+            pageSize = favoryPage.size,
+            totalElements = favoryPage.totalElements,
+            totalPages = favoryPage.totalPages
+        )
+    }
+
     private fun Favory.toResponse(): FavoryResponse {
         val tags = favoryTagMappingRepository.findAllByFavoryId(id!!)
             .map { TagInfo(id = it.tag.id!!, name = it.tag.name) }
