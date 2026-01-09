@@ -16,6 +16,9 @@ class UserService(
     private val s3Service: S3Service
 ) {
 
+    @Transactional(readOnly = true)
+    fun getMe(): UserResponse = getCurrentUserOrThrow().toResponse()
+
     fun getCurrentUserOrNull(): User? {
         val auth = SecurityContextHolder.getContext().authentication ?: return null
 
@@ -48,8 +51,7 @@ class UserService(
             ?: throw NotFoundException(ErrorCode.USER_NOT_FOUND)
 
     @Transactional(readOnly = true)
-    fun getById(id: Long): UserResponse =
-        findByIdOrThrow(id).toResponse()
+    fun getById(id: Long): UserResponse = findByIdOrThrow(id).toResponse()
 
     @Transactional
     fun update(id: Long, req: UpdateUserRequest): UserResponse {
@@ -63,8 +65,6 @@ class UserService(
                 user.nickname = newNick
             }
         }
-
-        req.profileImageUrl?.let { user.profileImageUrl = it }
         req.profileMessage?.let { user.profileMessage = it }
 
         return user.toResponse()
