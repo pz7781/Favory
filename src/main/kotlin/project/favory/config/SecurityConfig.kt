@@ -2,7 +2,6 @@ package project.favory.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -31,7 +30,7 @@ class SecurityConfig(
     fun corsConfigurationSource(): CorsConfigurationSource {
         val config = CorsConfiguration().apply {
             allowedOriginPatterns = listOf("*")
-            allowedMethods = listOf("GET","POST","PUT","PATCH","DELETE","OPTIONS")
+            allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
             allowedHeaders = listOf("*")
             allowCredentials = true
         }
@@ -57,9 +56,10 @@ class SecurityConfig(
                     .requestMatchers("/error").permitAll()
                     // 회원가입, 로그인, 로그아웃
                     .requestMatchers("/signup", "/login/**", "/refresh-token").permitAll()
-                    // Favory 조회
+                    // 유저 조회
+                    .requestMatchers(org.springframework.http.HttpMethod.GET, "/favories/me").authenticated()
+                    .requestMatchers(org.springframework.http.HttpMethod.GET, "/comments/me").authenticated()
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/favories", "/favories/**").permitAll()
-                    // 댓글 조회
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/comments/**").permitAll()
                     // 검색
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/search").permitAll()

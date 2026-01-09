@@ -50,6 +50,17 @@ class FavoryController(
         return favoryService.getFavoriesByMedia(mediaId)
     }
 
+    @Operation(summary = "내가 작성한 Favory 조회 (페이징, 정렬, 타입 필터)")
+    @GetMapping("/me")
+    fun getMyFavories(
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "10") size: Int,
+        @RequestParam(defaultValue = "latest") sort: String,
+        @RequestParam(required = false) type: MediaType?
+    ): PageResponse<FavoryResponse> {
+        return favoryService.getMyFavories(page, size, sort, type)
+    }
+
     @Operation(summary = "Favory 수정")
     @PutMapping("/{id}")
     fun updateFavory(

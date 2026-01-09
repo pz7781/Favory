@@ -35,6 +35,16 @@ class CommentController(
         return commentService.getCommentsByFavory(favoryId, page, size, sort)
     }
 
+    @Operation(summary = "내가 작성한 댓글 조회 (페이징, 정렬)")
+    @GetMapping("/me")
+    fun getMyComments(
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "10") size: Int,
+        @RequestParam(defaultValue = "latest") sort: String
+    ): PageResponse<CommentResponse> {
+        return commentService.getMyComments(page, size, sort)
+    }
+
     @Operation(summary = "댓글 수정")
     @PutMapping("/{id}")
     fun updateComment(
