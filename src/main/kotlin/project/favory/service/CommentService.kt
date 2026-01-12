@@ -116,12 +116,14 @@ class CommentService(
         comment.deletedAt = LocalDateTime.now()
     }
 
-    fun getMyComments(
+    fun getCommentsByUser(
+        nickname: String,
         page: Int = 0,
         size: Int = 10,
         sortBy: String = "latest"
     ): PageResponse<CommentResponse> {
-        val userId = authService.getCurrentUserId()
+        val user = userRepository.findByNickname(nickname)
+            ?: throw NotFoundException(ErrorCode.USER_NOT_FOUND)
 
         val sort = when (sortBy) {
             "oldest" -> Sort.by(Sort.Direction.ASC, "createdAt")
@@ -129,7 +131,7 @@ class CommentService(
         }
 
         val pageable: Pageable = PageRequest.of(page, size, sort)
-        val commentPage: Page<Comment> = commentRepository.findByUserIdAndDeletedAtIsNull(userId, pageable)
+        val commentPage: Page<Comment> = commentRepository.findByUserIdAndDeletedAtIsNull(user.id!!, pageable)
 
         val content = commentPage.content.map { it.toResponse() }
 

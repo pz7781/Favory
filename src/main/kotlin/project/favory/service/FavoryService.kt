@@ -171,13 +171,15 @@ class FavoryService(
         }
     }
 
-    fun getMyFavories(
+    fun getFavoriesByUser(
+        nickname: String,
         page: Int = 0,
         size: Int = 10,
         sortBy: String = "latest",
         type: MediaType? = null
     ): PageResponse<FavoryResponse> {
-        val userId = authService.getCurrentUserId()
+        val user = userRepository.findByNickname(nickname)
+            ?: throw NotFoundException(ErrorCode.USER_NOT_FOUND)
 
         val sort = when (sortBy) {
             "oldest" -> Sort.by(Sort.Direction.ASC, "createdAt")
@@ -186,9 +188,9 @@ class FavoryService(
 
         val pageable: Pageable = PageRequest.of(page, size, sort)
         val favoryPage: Page<Favory> = if (type != null) {
-            favoryRepository.findByUserIdAndMedia_TypeAndDeletedAtIsNull(userId, type, pageable)
+            favoryRepository.findByUserIdAndMedia_TypeAndDeletedAtIsNull(user.id!!, type, pageable)
         } else {
-            favoryRepository.findByUserIdAndDeletedAtIsNull(userId, pageable)
+            favoryRepository.findByUserIdAndDeletedAtIsNull(user.id!!, pageable)
         }
 
         val content = favoryPage.content.map { it.toResponse() }
