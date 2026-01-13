@@ -32,6 +32,8 @@ interface FavoryRepository : JpaRepository<Favory, Long> {
 
     fun findByDeletedAtIsNull(pageable: Pageable): Page<Favory>
 
+    fun findByIdInAndDeletedAtIsNull(ids: List<Long>): List<Favory>
+
     fun findByMedia_TypeAndDeletedAtIsNull(
         type: MediaType,
         pageable: Pageable

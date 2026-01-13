@@ -1,5 +1,6 @@
 package project.favory.service
 
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -115,22 +116,38 @@ class SearchService(
             if (category.equals("all", ignoreCase = true)) null
             else runCatching { MediaType.valueOf(category.uppercase()) }.getOrNull()
 
-        val mappingPage =
+        val idPage: Page<Long> =
             if (mediaType == null) {
-                favoryTagMappingRepository.findByTagNameContainingAndFavoryNotDeleted(tag, pageable)
+                favoryTagMappingRepository.findFavoryIdsByTagPrefix(tag, pageable)
             } else {
-                favoryTagMappingRepository.findByTagNameAndMediaType(tag, mediaType, pageable)
+                favoryTagMappingRepository.findFavoryIdsByTagPrefixAndMediaType(tag, mediaType, pageable)
             }
 
-        val favoryPage = mappingPage.map { it.favory }
-        val content: List<SearchResultItem> = favoryPage.content.map { it.toSearchResultItem() }
+        val ids = idPage.content
+        if (ids.isEmpty()) {
+            return PageResponse(
+                content = emptyList(),
+                pageNumber = idPage.number,
+                pageSize = idPage.size,
+                totalElements = idPage.totalElements,
+                totalPages = idPage.totalPages
+            )
+        }
+
+        val favories = favoryRepository.findByIdInAndDeletedAtIsNull(ids)
+        val favoryMap = favories.associateBy { it.id!! }
+        val orderedFavories = ids.mapNotNull { favoryMap[it] }
+
+        val tagsMap = buildTagsMap(orderedFavories)
+
+        val content = orderedFavories.map { f -> f.toSearchResultItem(tagsMap[f.id!!] ?: emptyList()) }
 
         return PageResponse(
             content = content,
-            pageNumber = favoryPage.number,
-            pageSize = favoryPage.size,
-            totalElements = favoryPage.totalElements,
-            totalPages = favoryPage.totalPages
+            pageNumber = idPage.number,
+            pageSize = idPage.size,
+            totalElements = idPage.totalElements,
+            totalPages = idPage.totalPages
         )
     }
 
@@ -180,7 +197,9 @@ class SearchService(
                     favoryRepository.findByMedia_TypeAndDeletedAtIsNull(mediaType, pageable)
                 }
 
-            val content = page.content.map { it.toSearchResultItem() }
+            val tagsMap = buildTagsMap(page.content)
+
+            val content = page.content.map { f -> f.toSearchResultItem(tagsMap[f.id!!] ?: emptyList()) }
 
             return PageResponse(
                 content = content,
@@ -194,7 +213,9 @@ class SearchService(
         if (tokens.size == 1) {
             val page = favoryRepository.searchCombined(tokens[0], mediaType, pageable)
 
-            val content = page.content.map { it.toSearchResultItem() }
+            val tagsMap = buildTagsMap(page.content)
+
+            val content = page.content.map { f -> f.toSearchResultItem(tagsMap[f.id!!] ?: emptyList()) }
 
             return PageResponse(
                 content = content,
@@ -242,7 +263,9 @@ class SearchService(
             filtered.subList(fromIndex, toIndex)
         }
 
-        val content = pageContent.map { it.toSearchResultItem() }
+        val tagsMap = buildTagsMap(pageContent)
+
+        val content = pageContent.map { f -> f.toSearchResultItem(tagsMap[f.id!!] ?: emptyList()) }
 
         return PageResponse(
             content = content,
@@ -253,7 +276,18 @@ class SearchService(
         )
     }
 
-    private fun Favory.toSearchResultItem() = SearchResultItem(
+    private fun buildTagsMap(favories: List<Favory>): Map<Long, List<TagInfo>> {
+        val ids = favories.mapNotNull { it.id }
+        if (ids.isEmpty()) return emptyMap()
+
+        return favoryTagMappingRepository.findAllWithTagByFavoryIdIn(ids)
+            .groupBy { it.favory.id!! }
+            .mapValues { (_, mappings) ->
+                mappings.map { m -> TagInfo(id = m.tag.id!!, name = m.tag.name) }
+            }
+    }
+
+    private fun Favory.toSearchResultItem(tags: List<TagInfo>) = SearchResultItem(
         id = this.id!!,
         userId = this.user.id!!,
         userNickname = this.user.nickname,
@@ -266,14 +300,7 @@ class SearchService(
         mediaImageUrl = this.media.imageUrl,
         title = this.title,
         content = this.content,
-        tags = favoryTagMappingRepository
-            .findAllByFavoryId(this.id!!)
-            .map {
-                TagInfo(
-                    id = it.tag.id!!,
-                    name = it.tag.name
-                )
-            },
+        tags = tags,
         createdAt = this.createdAt,
         updatedAt = this.updatedAt,
         deletedAt = this.deletedAt

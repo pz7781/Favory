@@ -15,6 +15,20 @@ interface FavoryTagMappingRepository : JpaRepository<FavoryTagMapping, Long> {
         """
         select ftm
         from FavoryTagMapping ftm
+        join fetch ftm.tag t
+        join ftm.favory f
+        where f.id in :favoryIds
+          and f.deletedAt is null
+        """
+    )
+    fun findAllWithTagByFavoryIdIn(
+        @Param("favoryIds") favoryIds: List<Long>
+    ): List<FavoryTagMapping>
+
+    @Query(
+        """
+        select ftm
+        from FavoryTagMapping ftm
         join ftm.tag t
         join ftm.favory f
         where f.deletedAt is null
@@ -28,7 +42,22 @@ interface FavoryTagMappingRepository : JpaRepository<FavoryTagMapping, Long> {
 
     @Query(
         """
-        select ftm
+        select distinct f.id
+        from FavoryTagMapping ftm
+        join ftm.tag t
+        join ftm.favory f
+        where f.deletedAt is null
+          and lower(t.name) like lower(concat(:tag, '%'))
+        """
+    )
+    fun findFavoryIdsByTagPrefix(
+        @Param("tag") tag: String,
+        pageable: Pageable
+    ): Page<Long>
+
+    @Query(
+        """
+        select distinct f.id
         from FavoryTagMapping ftm
         join ftm.tag t
         join ftm.favory f
@@ -38,9 +67,9 @@ interface FavoryTagMappingRepository : JpaRepository<FavoryTagMapping, Long> {
           and lower(t.name) like lower(concat(:tag, '%'))
         """
     )
-    fun findByTagNameAndMediaType(
+    fun findFavoryIdsByTagPrefixAndMediaType(
         @Param("tag") tag: String,
         @Param("mediaType") mediaType: MediaType,
         pageable: Pageable
-    ): Page<FavoryTagMapping>
+    ): Page<Long>
 }
