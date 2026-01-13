@@ -13,6 +13,8 @@ enum class ErrorCode(
     DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, 40003, "이미 사용 중인 이메일입니다."),
     DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST, 40004, "이미 사용 중인 닉네임입니다."),
     OAUTH_EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, 40005, "이미 이 이메일로 가입된 계정이 있습니다."),
+    INVALID_FILE_FORMAT(HttpStatus.BAD_REQUEST, 40006, "지원하지 않는 파일 형식입니다."),
+    FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, 40007, "파일 크기가 제한을 초과했습니다."),
 
     // 401 Unauthorized
     INVALID_EMAIL(HttpStatus.UNAUTHORIZED, 40101, "이메일이 올바르지 않습니다."),

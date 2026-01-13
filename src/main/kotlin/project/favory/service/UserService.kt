@@ -4,11 +4,13 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
+import project.favory.common.exception.BadRequestException
+import project.favory.common.exception.ErrorCode
+import project.favory.common.exception.NotFoundException
 import project.favory.dto.user.request.UpdateUserRequest
 import project.favory.dto.user.response.UserResponse
 import project.favory.entity.User
 import project.favory.repository.UserRepository
-import project.favory.common.exception.*
 
 @Service
 class UserService(
@@ -72,6 +74,8 @@ class UserService(
 
     @Transactional
     fun uploadProfileImage(id: Long, file: MultipartFile): String {
+        validateProfileImage(file)
+
         val user = findByIdOrThrow(id)
         val oldImageUrl = user.profileImageUrl
 
@@ -86,6 +90,22 @@ class UserService(
         }
 
         return newImageUrl
+    }
+
+    private fun validateProfileImage(file: MultipartFile) {
+        // 파일 크기 검증 (5MB)
+        val maxSizeInBytes = 5 * 1024 * 1024L
+        if (file.size > maxSizeInBytes) {
+            throw BadRequestException(ErrorCode.FILE_SIZE_EXCEEDED)
+        }
+
+        // 파일 확장자 검증
+        val allowedFormats = setOf("jpg", "jpeg", "png", "ico", "webp")
+        val extension = file.originalFilename?.substringAfterLast(".", "")?.lowercase()
+
+        if (extension !in allowedFormats) {
+            throw BadRequestException(ErrorCode.INVALID_FILE_FORMAT)
+        }
     }
 
     @Transactional
