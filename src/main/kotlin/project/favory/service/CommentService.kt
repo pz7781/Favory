@@ -77,7 +77,7 @@ class CommentService(
         }
 
         val pageable: Pageable = PageRequest.of(page, size, sort)
-        val commentPage: Page<Comment> = commentRepository.findAllByFavoryIdAndDeletedAtIsNull(favoryId, pageable)
+        val commentPage: Page<Comment> = commentRepository.findAllByFavoryIdWithMedia(favoryId, pageable)
 
         val content = commentPage.content.map { it.toResponse() }
 
@@ -129,7 +129,7 @@ class CommentService(
         }
 
         val pageable: Pageable = PageRequest.of(page, size, sort)
-        val commentPage: Page<Comment> = commentRepository.findByUserIdAndDeletedAtIsNull(userId, pageable)
+        val commentPage: Page<Comment> = commentRepository.findByUserIdWithMedia(userId, pageable)
 
         val content = commentPage.content.map { it.toResponse() }
 
@@ -149,6 +149,7 @@ class CommentService(
         userNickname = user.nickname,
         userImageUrl = user.profileImageUrl,
         content = content,
+        mediaType = favory.media.type,
         createdAt = createdAt,
         updatedAt = updatedAt,
         deletedAt = deletedAt
