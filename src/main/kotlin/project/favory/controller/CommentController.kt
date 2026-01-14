@@ -37,7 +37,7 @@ class CommentController(
 
     @SecurityNotRequired
     @Operation(summary = "특정 사용자가 작성한 댓글 조회 (페이징, 정렬)")
-    @GetMapping("/{nickname}")
+    @GetMapping("/users/{nickname}")
     fun getCommentsByUser(
         @PathVariable nickname: String,
         @RequestParam(defaultValue = "0") page: Int,

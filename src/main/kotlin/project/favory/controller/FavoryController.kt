@@ -52,7 +52,7 @@ class FavoryController(
 
     @SecurityNotRequired
     @Operation(summary = "특정 사용자가 작성한 Favory 조회 (페이징, 정렬, 타입 필터)")
-    @GetMapping("/{nickname}")
+    @GetMapping("/users/{nickname}")
     fun getFavoriesByUser(
         @PathVariable nickname: String,
         @RequestParam(defaultValue = "0") page: Int,
