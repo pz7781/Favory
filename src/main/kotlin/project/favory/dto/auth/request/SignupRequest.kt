@@ -21,8 +21,8 @@ class SignupRequest (
 
     @field:NotBlank @field:Size(min = 3, max = 10)
     @field:Pattern(
-        regexp = "^[A-Za-z0-9]+$",
-        message = "닉네임은 영문 또는 숫자만 사용할 수 있습니다. ( 3~10자 사이 )"
+        regexp = "^[a-z0-9]{3,10}$",
+        message = "닉네임은 소문자 영문 또는 숫자만 사용할 수 있습니다. ( 3~10자 사이 )"
     )
     val nickname: String
 ){

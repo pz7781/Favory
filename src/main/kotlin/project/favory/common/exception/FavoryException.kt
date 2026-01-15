@@ -26,3 +26,8 @@ class NotFoundException(
     errorCode: ErrorCode,
     message: String = errorCode.message
 ) : FavoryException(errorCode, message)
+
+class InternalServerException(
+    errorCode: ErrorCode = ErrorCode.INTERNAL_ERROR,
+    message: String = errorCode.message
+) : FavoryException(errorCode, message)

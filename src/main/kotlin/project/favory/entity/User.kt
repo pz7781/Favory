@@ -1,6 +1,8 @@
 package project.favory.entity
 
 import jakarta.persistence.*
+import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Size
 
 @Entity
 @Table(name = "users")
@@ -22,7 +24,9 @@ class User(
     @Column(name = "provider_id", length = 100, nullable = true)
     val providerId: String? = null,
 
-    @Column(length = 50, nullable = false)
+    @Column(nullable = false, unique = true, length = 10)
+    @field:Size(min = 3, max = 10)
+    @field:Pattern(regexp = "^[a-z0-9]+$")
     var nickname: String,
 
     @Column(length = 500, nullable = true)
