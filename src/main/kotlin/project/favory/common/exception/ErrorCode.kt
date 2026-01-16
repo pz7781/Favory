@@ -37,5 +37,6 @@ enum class ErrorCode(
     COMMENT_DELETED(HttpStatus.NOT_FOUND, 40406, "삭제된 댓글입니다."),
 
     // 500 Internal Server Error
-    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 50001, "서버 내부 오류가 발생했습니다.")
+    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 50001, "서버 내부 오류가 발생했습니다."),
+    NICKNAME_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 50002, "닉네임 생성에 실패했습니다. 잠시 후 다시 시도해주세요.")
 }

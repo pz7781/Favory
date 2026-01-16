@@ -42,7 +42,7 @@ class UserService(
 
     @Transactional(readOnly = true)
     fun getByNickname(nickname: String): UserResponse =
-        userRepository.findByNickname(nickname)
+        userRepository.findByNickname(nickname.trim().lowercase())
             ?.toResponse()
             ?: throw NotFoundException(ErrorCode.USER_NOT_FOUND)
 
@@ -59,7 +59,9 @@ class UserService(
     fun update(id: Long, req: UpdateUserRequest): UserResponse {
         val user = findByIdOrThrow(id)
 
-        req.nickname?.let { newNick ->
+        req.nickname?.let { raw ->
+            val newNick = raw.trim().lowercase()
+
             if (newNick.isNotBlank() && newNick != user.nickname) {
                 if (userRepository.existsByNickname(newNick)) {
                     throw BadRequestException(ErrorCode.DUPLICATE_NICKNAME, field = "nickname")

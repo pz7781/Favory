@@ -4,6 +4,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.client.HttpServerErrorException
 import project.favory.dto.auth.request.LoginRequest
 import project.favory.dto.auth.request.SignupRequest
 import project.favory.dto.auth.response.LoginResponse
@@ -26,7 +27,6 @@ class AuthService(
     private val googleTokenVerifier: GoogleTokenVerifier
 ) {
 
-    // 회원가입
     @Transactional
     fun signup(req: SignupRequest): UserResponse {
 
@@ -34,10 +34,12 @@ class AuthService(
             throw BadRequestException(ErrorCode.PASSWORD_MISMATCH)
         }
 
+        val nickname = req.nickname.trim().lowercase()
+
         if (userRepository.existsByEmail(req.email)) {
             throw BadRequestException(ErrorCode.DUPLICATE_EMAIL, field = "email")
         }
-        if (userRepository.existsByNickname(req.nickname)) {
+        if (userRepository.existsByNickname(nickname)) {
             throw BadRequestException(ErrorCode.DUPLICATE_NICKNAME, field = "nickname")
         }
 
@@ -47,13 +49,12 @@ class AuthService(
             User(
                 email = req.email,
                 password = encoded,
-                nickname = req.nickname
+                nickname = nickname
             )
         )
         return saved.toAuthResponse()
     }
 
-    // 로그인
     @Transactional(readOnly = true)
     fun login(req: LoginRequest): LoginResponse {
         val user = userRepository.findByEmail(req.email)
@@ -63,15 +64,8 @@ class AuthService(
             throw UnauthorizedException(ErrorCode.INVALID_PASSWORD)
         }
 
-        val accessToken = jwtTokenProvider.generateAccessToken(user.id!!, user.email)
-        val refreshToken = jwtTokenProvider.generateRefreshToken(user.id!!, user.email)
+        return issueTokens(user)
 
-        return LoginResponse(
-            accessToken = accessToken,
-            refreshToken = refreshToken,
-            tokenType = "Bearer",
-            user = user.toAuthResponse()
-        )
     }
 
     @Transactional
@@ -98,7 +92,7 @@ class AuthService(
             }
 
             else -> {
-                val nickname = generateUniqueNickname(info.name, info.email)
+                val nickname = generateUniqueNickname(info.email)
                 userRepository.save(
                     User(
                         email = info.email,
@@ -112,18 +106,10 @@ class AuthService(
             }
         }
 
-        val accessToken = jwtTokenProvider.generateAccessToken(user.id!!, user.email)
-        val refreshToken = jwtTokenProvider.generateRefreshToken(user.id!!, user.email)
+        return issueTokens(user)
 
-        return LoginResponse(
-            accessToken = accessToken,
-            refreshToken = refreshToken,
-            tokenType = "Bearer",
-            user = user.toAuthResponse()
-        )
     }
 
-    // 토큰 갱신
     @Transactional(readOnly = true)
     fun refreshToken(refreshToken: String): LoginResponse {
 
@@ -146,15 +132,8 @@ class AuthService(
             throw UnauthorizedException(ErrorCode.INVALID_TOKEN_INFO)
         }
 
-        val newAccessToken = jwtTokenProvider.generateAccessToken(user.id!!, user.email)
-        val newRefreshToken = jwtTokenProvider.generateRefreshToken(user.id!!, user.email)
+        return issueTokens(user)
 
-        return LoginResponse(
-            accessToken = newAccessToken,
-            refreshToken = newRefreshToken,
-            tokenType = "Bearer",
-            user = user.toAuthResponse()
-        )
     }
 
     fun getCurrentUserId(): Long {
@@ -168,19 +147,49 @@ class AuthService(
             throw ForbiddenException(ErrorCode.ACCESS_DENIED)
         }
     }
-    private fun generateUniqueNickname(name: String?, email: String): String {
-        val base = (name?.trim().takeIf { !it.isNullOrBlank() }
-            ?: email.substringBefore("@")).take(20)
 
-        var candidate = base
-        var i = 1
-        while (userRepository.existsByNickname(candidate)) {
-            candidate = "${base}_${i++}"
-            if (candidate.length > 50) {
-                candidate = candidate.take(50)
+    private fun issueTokens(user: User): LoginResponse {
+        val accessToken = jwtTokenProvider.generateAccessToken(user.id!!, user.email)
+        val refreshToken = jwtTokenProvider.generateRefreshToken(user.id!!, user.email)
+
+        return LoginResponse(
+            accessToken = accessToken,
+            refreshToken = refreshToken,
+            tokenType = "Bearer",
+            user = user.toAuthResponse()
+        )
+    }
+
+    private val EMAIL_LOCALPART_REGEX = Regex("^[a-z0-9]+$")
+    private val NICKNAME_CHARSET = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+    private fun generateUniqueNickname(email: String): String {
+        val local = email.substringBefore("@").lowercase()
+
+        val candidateFromEmail: String? =
+            if (local.length >= 3 && EMAIL_LOCALPART_REGEX.matches(local)) {
+                local.take(10)
+            } else null
+
+        if (candidateFromEmail != null && !userRepository.existsByNickname(candidateFromEmail)) {
+            return candidateFromEmail
+        }
+
+        repeat(20) {
+            val randomNick = generateRandomNickname(3, 10)
+            if (!userRepository.existsByNickname(randomNick)) return randomNick
+        }
+
+        throw InternalServerException(ErrorCode.NICKNAME_GENERATION_FAILED)
+    }
+
+    private fun generateRandomNickname(min: Int, max: Int): String {
+        val len = kotlin.random.Random.nextInt(min, max + 1)
+        return buildString(len) {
+            repeat(len) {
+                append(NICKNAME_CHARSET[kotlin.random.Random.nextInt(NICKNAME_CHARSET.length)])
             }
         }
-        return candidate
     }
 
     private fun User.toAuthResponse() = UserResponse(
