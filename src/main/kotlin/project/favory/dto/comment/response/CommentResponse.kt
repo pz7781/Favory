@@ -1,5 +1,6 @@
 package project.favory.dto.comment.response
 
+import project.favory.entity.MediaType
 import java.time.LocalDateTime
 
 data class CommentResponse(
@@ -9,6 +10,7 @@ data class CommentResponse(
     val userNickname: String,
     val userImageUrl: String? = null,
     val content: String,
+    val mediaType: MediaType,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
     val deletedAt: LocalDateTime?
