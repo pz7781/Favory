@@ -7,6 +7,8 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import project.favory.common.exception.ErrorCode
+import project.favory.common.exception.NotFoundException
 import project.favory.dto.comment.request.CreateCommentRequest
 import project.favory.dto.comment.request.UpdateCommentRequest
 import project.favory.dto.comment.response.CommentResponse
@@ -15,7 +17,6 @@ import project.favory.entity.Comment
 import project.favory.repository.CommentRepository
 import project.favory.repository.FavoryRepository
 import project.favory.repository.UserRepository
-import project.favory.common.exception.*
 import java.time.LocalDateTime
 
 @Service
@@ -131,7 +132,7 @@ class CommentService(
         }
 
         val pageable: Pageable = PageRequest.of(page, size, sort)
-        val commentPage: Page<Comment> = commentRepository.findByUserIdWithMedia(userId, pageable)
+        val commentPage: Page<Comment> = commentRepository.findByUserIdWithMedia(user.id!!, pageable)
 
         val content = commentPage.content.map { it.toResponse() }
 
