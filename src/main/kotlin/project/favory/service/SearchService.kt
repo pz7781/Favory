@@ -116,11 +116,13 @@ class SearchService(
             if (category.equals("all", ignoreCase = true)) null
             else runCatching { MediaType.valueOf(category.uppercase()) }.getOrNull()
 
+        val plainPageable = PageRequest.of(pageable.pageNumber, pageable.pageSize)
+
         val idPage: Page<Long> =
             if (mediaType == null) {
-                favoryTagMappingRepository.findFavoryIdsByTagPrefix(tag, pageable)
+                favoryTagMappingRepository.findFavoryIdsByTagPrefix(tag, plainPageable)
             } else {
-                favoryTagMappingRepository.findFavoryIdsByTagPrefixAndMediaType(tag, mediaType, pageable)
+                favoryTagMappingRepository.findFavoryIdsByTagPrefixAndMediaType(tag, mediaType, plainPageable)
             }
 
         val ids = idPage.content

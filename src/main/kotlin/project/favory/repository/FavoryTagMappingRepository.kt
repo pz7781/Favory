@@ -48,6 +48,8 @@ interface FavoryTagMappingRepository : JpaRepository<FavoryTagMapping, Long> {
         join ftm.favory f
         where f.deletedAt is null
           and lower(t.name) like lower(concat(:tag, '%'))
+        group by f.id
+        order by max(f.createdAt) desc
         """
     )
     fun findFavoryIdsByTagPrefix(
@@ -65,6 +67,8 @@ interface FavoryTagMappingRepository : JpaRepository<FavoryTagMapping, Long> {
         where f.deletedAt is null
           and m.type = :mediaType
           and lower(t.name) like lower(concat(:tag, '%'))
+        group by f.id
+        order by max(f.createdAt) desc
         """
     )
     fun findFavoryIdsByTagPrefixAndMediaType(
