@@ -1,5 +1,6 @@
 package project.favory.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
@@ -26,4 +27,9 @@ class Favory(
 
     @Column(nullable = true)
     var deletedAt: LocalDateTime?
-) : AbstractTimeEntity()
+) : AbstractTimeEntity() {
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "favory", fetch = FetchType.LAZY)
+    val tagMappings: List<FavoryTagMapping> = mutableListOf()
+}

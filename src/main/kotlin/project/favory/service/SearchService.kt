@@ -44,7 +44,7 @@ class SearchService(
                 if (pureTag.isBlank()) {
                     emptyPage(pageable)
                 } else {
-                    searchByTag(pureTag, category, pageable)
+                    searchByTag(pureTag, category, pageable, sort)
                 }
             }
 
@@ -110,20 +110,22 @@ class SearchService(
         searchRecentRepository.deleteAllByUserId(userId)
     }
 
-    private fun searchByTag(tag: String, category: String, pageable: Pageable): PageResponse<SearchResultItem> {
+    private fun searchByTag(tag: String, category: String, pageable: Pageable, sort: String): PageResponse<SearchResultItem> {
+
+        val favoryPageable = PageRequest.of(pageable.pageNumber, pageable.pageSize, toSort(sort))
+
         val mediaType: MediaType? =
             if (category.equals("all", ignoreCase = true)) null
             else runCatching { MediaType.valueOf(category.uppercase()) }.getOrNull()
 
-        val mappingPage =
+        val favoryPage =
             if (mediaType == null) {
-                favoryTagMappingRepository.findByTagNameContainingAndFavoryNotDeleted(tag, pageable)
+                favoryTagMappingRepository.findByTagNameContainingAndFavoryNotDeleted(tag, favoryPageable)
             } else {
-                favoryTagMappingRepository.findByTagNameAndMediaType(tag, mediaType, pageable)
+                favoryTagMappingRepository.findByTagNameAndMediaType(tag, mediaType, favoryPageable)
             }
 
-        val favoryPage = mappingPage.map { it.favory }
-        val content: List<SearchResultItem> = favoryPage.content.map { it.toSearchResultItem() }
+        val content = favoryPage.content.map { it.toSearchResultItem() }
 
         return PageResponse(
             content = content,

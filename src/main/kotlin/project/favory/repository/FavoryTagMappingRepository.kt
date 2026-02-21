@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
+import project.favory.entity.Favory
 import project.favory.entity.FavoryTagMapping
 import project.favory.entity.MediaType
 
@@ -13,10 +14,10 @@ interface FavoryTagMappingRepository : JpaRepository<FavoryTagMapping, Long> {
 
     @Query(
         """
-        select ftm
-        from FavoryTagMapping ftm
+        select distinct f
+        from Favory f
+        join f.tagMappings ftm
         join ftm.tag t
-        join ftm.favory f
         where f.deletedAt is null
           and lower(t.name) like lower(concat(:tag, '%'))
         """
@@ -24,14 +25,14 @@ interface FavoryTagMappingRepository : JpaRepository<FavoryTagMapping, Long> {
     fun findByTagNameContainingAndFavoryNotDeleted(
         @Param("tag") tag: String,
         pageable: Pageable
-    ): Page<FavoryTagMapping>
+    ): Page<Favory>
 
     @Query(
         """
-        select ftm
-        from FavoryTagMapping ftm
+        select distinct f
+        from Favory f
+        join f.tagMappings ftm
         join ftm.tag t
-        join ftm.favory f
         join f.media m
         where f.deletedAt is null
           and m.type = :mediaType
@@ -42,5 +43,5 @@ interface FavoryTagMappingRepository : JpaRepository<FavoryTagMapping, Long> {
         @Param("tag") tag: String,
         @Param("mediaType") mediaType: MediaType,
         pageable: Pageable
-    ): Page<FavoryTagMapping>
+    ): Page<Favory>
 }
