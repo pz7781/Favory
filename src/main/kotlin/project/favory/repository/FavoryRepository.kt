@@ -44,4 +44,37 @@ interface FavoryRepository : JpaRepository<Favory, Long> {
         type: MediaType,
         pageable: Pageable
     ): Page<Favory>
+
+    @Query(
+        """
+        select distinct f
+        from Favory f
+        join FavoryTagMapping ftm on ftm.favory = f
+        join ftm.tag t
+        where f.deletedAt is null
+          and lower(t.name) like lower(concat(:tag, '%'))
+        """
+    )
+    fun findByTagNameContainingAndFavoryNotDeleted(
+        @Param("tag") tag: String,
+        pageable: Pageable
+    ): Page<Favory>
+
+    @Query(
+        """
+        select distinct f
+        from Favory f
+        join FavoryTagMapping ftm on ftm.favory = f
+        join ftm.tag t
+        join f.media m
+        where f.deletedAt is null
+          and m.type = :mediaType
+          and lower(t.name) like lower(concat(:tag, '%'))
+        """
+    )
+    fun findByTagNameAndMediaType(
+        @Param("tag") tag: String,
+        @Param("mediaType") mediaType: MediaType,
+        pageable: Pageable
+    ): Page<Favory>
 }

@@ -27,9 +27,4 @@ class Favory(
 
     @Column(nullable = true)
     var deletedAt: LocalDateTime?
-) : AbstractTimeEntity() {
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "favory", fetch = FetchType.LAZY)
-    val tagMappings: List<FavoryTagMapping> = mutableListOf()
-}
+) : AbstractTimeEntity()

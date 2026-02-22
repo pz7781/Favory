@@ -120,9 +120,9 @@ class SearchService(
 
         val favoryPage =
             if (mediaType == null) {
-                favoryTagMappingRepository.findByTagNameContainingAndFavoryNotDeleted(tag, favoryPageable)
+                favoryRepository.findByTagNameContainingAndFavoryNotDeleted(tag, favoryPageable)
             } else {
-                favoryTagMappingRepository.findByTagNameAndMediaType(tag, mediaType, favoryPageable)
+                favoryRepository.findByTagNameAndMediaType(tag, mediaType, favoryPageable)
             }
 
         val content = favoryPage.content.map { it.toSearchResultItem() }
