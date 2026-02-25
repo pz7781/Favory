@@ -79,3 +79,15 @@ CREATE TABLE favory_tag_mappings (
     INDEX idx_favory_tag_mapping_favory_id (favory_id),
     INDEX idx_favory_tag_mapping_tag_id (tag_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE email_verifications (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    code_hash VARCHAR(255) NOT NULL,
+    code_expires_at TIMESTAMP(6) NOT NULL,
+    verify_token_hash VARCHAR(255),
+    verify_token_expires_at TIMESTAMP(6),
+    verified_at TIMESTAMP(6),
+    created_at TIMESTAMP(6) NOT NULL,
+    updated_at TIMESTAMP(6) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

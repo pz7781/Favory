@@ -4,16 +4,18 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.client.HttpServerErrorException
+import project.favory.common.exception.*
+import project.favory.dto.auth.request.EmailVerificationConfirmRequest
+import project.favory.dto.auth.request.EmailVerificationSendRequest
 import project.favory.dto.auth.request.LoginRequest
 import project.favory.dto.auth.request.SignupRequest
+import project.favory.dto.auth.response.EmailVerificationConfirmResponse
 import project.favory.dto.auth.response.LoginResponse
 import project.favory.dto.auth.response.UserResponse
+import project.favory.entity.AuthProvider
 import project.favory.entity.User
 import project.favory.repository.UserRepository
 import project.favory.security.JwtTokenProvider
-import project.favory.common.exception.*
-import project.favory.entity.AuthProvider
 import project.favory.security.oauth.GoogleTokenVerifier
 import java.util.UUID
 
@@ -24,7 +26,8 @@ class AuthService(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
     private val jwtTokenProvider: JwtTokenProvider,
-    private val googleTokenVerifier: GoogleTokenVerifier
+    private val googleTokenVerifier: GoogleTokenVerifier,
+    private val emailVerificationService: EmailVerificationService
 ) {
 
     @Transactional
@@ -43,6 +46,8 @@ class AuthService(
             throw BadRequestException(ErrorCode.DUPLICATE_NICKNAME, field = "nickname")
         }
 
+        emailVerificationService.validateAndConsume(req.email, req.verifyToken)
+
         val encoded = passwordEncoder.encode(req.password)
 
         val saved = userRepository.save(
@@ -53,6 +58,21 @@ class AuthService(
             )
         )
         return saved.toAuthResponse()
+    }
+
+    @Transactional
+    fun sendEmailVerification(req: EmailVerificationSendRequest) {
+        if (userRepository.existsByEmail(req.email)) {
+            throw BadRequestException(ErrorCode.DUPLICATE_EMAIL, field = "email")
+        }
+
+        emailVerificationService.sendCode(req.email)
+    }
+
+    @Transactional
+    fun verifyEmail(req: EmailVerificationConfirmRequest): EmailVerificationConfirmResponse {
+        val verifyToken = emailVerificationService.verifyCode(req.email, req.code)
+        return EmailVerificationConfirmResponse(verifyToken = verifyToken)
     }
 
     @Transactional(readOnly = true)

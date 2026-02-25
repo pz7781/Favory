@@ -15,6 +15,9 @@ enum class ErrorCode(
     OAUTH_EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, 40005, "이미 이 이메일로 가입된 계정이 있습니다."),
     INVALID_FILE_FORMAT(HttpStatus.BAD_REQUEST, 40006, "지원하지 않는 파일 형식입니다."),
     FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, 40007, "파일 크기가 제한을 초과했습니다."),
+    EMAIL_VERIFICATION_REQUIRED(HttpStatus.BAD_REQUEST, 40008, "이메일 인증이 필요합니다."),
+    INVALID_EMAIL_VERIFICATION_CODE(HttpStatus.BAD_REQUEST, 40009, "유효하지 않거나 만료된 인증번호입니다."),
+    INVALID_EMAIL_VERIFICATION_TOKEN(HttpStatus.BAD_REQUEST, 40010, "유효하지 않거나 만료된 인증 토큰입니다."),
 
     // 401 Unauthorized
     INVALID_EMAIL(HttpStatus.UNAUTHORIZED, 40101, "이메일이 올바르지 않습니다."),
@@ -38,5 +41,6 @@ enum class ErrorCode(
 
     // 500 Internal Server Error
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 50001, "서버 내부 오류가 발생했습니다."),
-    NICKNAME_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 50002, "닉네임 생성에 실패했습니다. 잠시 후 다시 시도해주세요.")
+    NICKNAME_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 50002, "닉네임 생성에 실패했습니다. 잠시 후 다시 시도해주세요."),
+    EMAIL_VERIFICATION_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 50003, "인증 메일 발송에 실패했습니다.")
 }

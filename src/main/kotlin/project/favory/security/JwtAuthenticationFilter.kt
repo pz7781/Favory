@@ -25,7 +25,7 @@ class JwtAuthenticationFilter(
         get() = environment.activeProfiles.contains("prod")
 
     private val whiteListPrefixes = listOf(
-        "/login", "/signup",
+        "/login", "/signup", "/auth/email",
         "/swagger-ui", "/v3/api-docs", "/error"
     )
 
