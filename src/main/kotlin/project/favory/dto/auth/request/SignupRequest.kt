@@ -9,6 +9,9 @@ class SignupRequest (
     @field:Email @field:NotBlank
     val email: String,
 
+    @field:NotBlank
+    val verifyToken: String,
+
     @field:NotBlank @field:Size(min = 8, max = 100)
     @field:Pattern(
         regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#\$%^&*()_+]).{8,100}$",
