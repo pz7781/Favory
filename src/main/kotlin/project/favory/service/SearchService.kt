@@ -16,6 +16,7 @@ import project.favory.entity.MediaType
 import project.favory.entity.SearchRecent
 import project.favory.repository.FavoryRepository
 import project.favory.repository.FavoryTagMappingRepository
+import project.favory.repository.LikeRepository
 import project.favory.repository.SearchRecentRepository
 import project.favory.repository.UserRepository
 import java.time.LocalDateTime
@@ -25,7 +26,8 @@ class SearchService(
     private val searchRecentRepository: SearchRecentRepository,
     private val userRepository: UserRepository,
     private val favoryRepository: FavoryRepository,
-    private val favoryTagMappingRepository: FavoryTagMappingRepository
+    private val favoryTagMappingRepository: FavoryTagMappingRepository,
+    private val likeRepository: LikeRepository
 ) {
     fun search(userId: Long?, request: SearchRequest): PageResponse<*> {
         val keyword = request.keyword.trim()
@@ -71,6 +73,7 @@ class SearchService(
     private fun toSort(sort: String): Sort =
         when (sort.lowercase()) {
             "oldest" -> Sort.by(Sort.Direction.ASC, "createdAt")
+            "popular" -> Sort.by(Sort.Direction.DESC, "likeCount")
             else -> Sort.by(Sort.Direction.DESC, "createdAt")
         }
 
@@ -276,6 +279,7 @@ class SearchService(
                     name = it.tag.name
                 )
             },
+        likeCount = this.likeCount,
         createdAt = this.createdAt,
         updatedAt = this.updatedAt,
         deletedAt = this.deletedAt
