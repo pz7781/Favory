@@ -38,11 +38,13 @@ CREATE TABLE favory (
     media_id BIGINT NOT NULL,
     title VARCHAR(100) NOT NULL,
     content TEXT NOT NULL,
+    like_count INT NOT NULL DEFAULT 0,
     deleted_at TIMESTAMP(6),
     created_at TIMESTAMP(6) NOT NULL,
     updated_at TIMESTAMP(6) NOT NULL,
     INDEX idx_favory_user_id (user_id),
     INDEX idx_favory_media_id (media_id),
+    INDEX idx_favory_like_count (like_count),
     INDEX idx_favory_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -77,7 +79,20 @@ CREATE TABLE favory_tag_mappings (
     created_at TIMESTAMP(6) NOT NULL,
     updated_at TIMESTAMP(6) NOT NULL,
     INDEX idx_favory_tag_mapping_favory_id (favory_id),
-    INDEX idx_favory_tag_mapping_tag_id (tag_id)
+    INDEX idx_favory_tag_mapping_tag_id (tag_id),
+    CONSTRAINT uk_favory_tag UNIQUE (favory_id, tag_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE likes (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    favory_id BIGINT NOT NULL,
+    created_at TIMESTAMP(6) NOT NULL,
+    CONSTRAINT uk_likes UNIQUE (user_id, favory_id),
+    INDEX idx_like_favory (favory_id),
+    INDEX idx_like_user (user_id),
+    CONSTRAINT fk_like_user FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_like_favory FOREIGN KEY (favory_id) REFERENCES favory(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE email_verifications (

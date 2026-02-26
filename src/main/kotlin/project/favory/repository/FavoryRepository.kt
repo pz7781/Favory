@@ -3,6 +3,7 @@ package project.favory.repository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import project.favory.entity.Favory
@@ -77,4 +78,24 @@ interface FavoryRepository : JpaRepository<Favory, Long> {
         @Param("mediaType") mediaType: MediaType,
         pageable: Pageable
     ): Page<Favory>
+
+    @Modifying
+    @Query(
+        """
+        update Favory f
+        set f.likeCount = f.likeCount + 1
+        where f.id = :favoryId
+        """
+    )
+    fun increaseLikeCount(@Param("favoryId") favoryId: Long)
+
+    @Modifying
+    @Query(
+        """
+        update Favory f
+        set f.likeCount = f.likeCount - 1
+        where f.id = :favoryId
+        """
+    )
+    fun decreaseLikeCount(@Param("favoryId") favoryId: Long)
 }

@@ -24,8 +24,7 @@ class FavoryController(
         return favoryService.createFavory(request)
     }
 
-    @SecurityNotRequired
-    @Operation(summary = "전체 Favory 조회 (페이징, 정렬: latest/oldest, 타입 필터)")
+    @Operation(summary = "전체 Favory 조회 (페이징, 정렬: latest/oldest/popular, 타입 필터)")
     @GetMapping
     fun getAllFavories(
         @RequestParam(defaultValue = "0") page: Int,
@@ -36,21 +35,18 @@ class FavoryController(
         return favoryService.getAllFavories(page, size, sort, type)
     }
 
-    @SecurityNotRequired
     @Operation(summary = "Favory 단건 조회")
     @GetMapping("/{id}")
     fun getFavory(@PathVariable id: Long): FavoryResponse {
         return favoryService.getFavory(id)
     }
 
-    @SecurityNotRequired
     @Operation(summary = "미디어별 Favory 조회")
     @GetMapping("/media/{mediaId}")
     fun getFavoriesByMedia(@PathVariable mediaId: Long): List<FavoryResponse> {
         return favoryService.getFavoriesByMedia(mediaId)
     }
 
-    @SecurityNotRequired
     @Operation(summary = "특정 사용자가 작성한 Favory 조회 (페이징, 정렬, 타입 필터)")
     @GetMapping("/users/{nickname}")
     fun getFavoriesByUser(
