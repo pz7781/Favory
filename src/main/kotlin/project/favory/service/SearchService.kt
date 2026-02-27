@@ -44,7 +44,7 @@ class SearchService(
                 if (pureTag.isBlank()) {
                     emptyPage(pageable)
                 } else {
-                    searchByTag(pureTag, category, pageable)
+                    searchByTag(pureTag, category, pageable, sort)
                 }
             }
 
@@ -110,7 +110,10 @@ class SearchService(
         searchRecentRepository.deleteAllByUserId(userId)
     }
 
-    private fun searchByTag(tag: String, category: String, pageable: Pageable): PageResponse<SearchResultItem> {
+    private fun searchByTag(tag: String, category: String, pageable: Pageable, sort: String): PageResponse<SearchResultItem> {
+
+        val favoryPageable = PageRequest.of(pageable.pageNumber, pageable.pageSize, toSort(sort))
+
         val mediaType: MediaType? =
             if (category.equals("all", ignoreCase = true)) null
             else runCatching { MediaType.valueOf(category.uppercase()) }.getOrNull()

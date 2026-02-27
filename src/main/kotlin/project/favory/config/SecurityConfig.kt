@@ -54,8 +54,8 @@ class SecurityConfig(
                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                     // 에러 페이지
                     .requestMatchers("/error").permitAll()
-                    // 회원가입, 로그인, 로그아웃
-                    .requestMatchers("/signup", "/login/**", "/refresh-token").permitAll()
+                    // 회원가입, 로그인, 이메일 인증
+                    .requestMatchers("/signup", "/login/**", "/refresh-token", "/auth/email/**").permitAll()
                     // 유저 favory/comment 조회
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/favories", "/favories/**").permitAll()
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/comments/**").permitAll()
