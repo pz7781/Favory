@@ -115,13 +115,11 @@ class SearchService(
             if (category.equals("all", ignoreCase = true)) null
             else runCatching { MediaType.valueOf(category.uppercase()) }.getOrNull()
 
-        val pageableNoSort = PageRequest.of(pageable.pageNumber, pageable.pageSize)
-
         val favoryPage =
             if (mediaType == null) {
-                favoryTagMappingRepository.findFavoriesByTagPrefix(tag, pageableNoSort)
+                favoryTagMappingRepository.findFavoriesByTagPrefix(tag, pageable)
             } else {
-                favoryTagMappingRepository.findFavoriesByTagPrefixAndMediaType(tag, mediaType, pageableNoSort)
+                favoryTagMappingRepository.findFavoriesByTagPrefixAndMediaType(tag, mediaType, pageable)
             }
 
         val content = buildSearchResultItems(favoryPage.content)

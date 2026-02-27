@@ -48,20 +48,19 @@ interface FavoryTagMappingRepository : JpaRepository<FavoryTagMapping, Long> {
     @Query(
         value = """
         select distinct f
-        from FavoryTagMapping ftm
-        join ftm.tag t
-        join ftm.favory f
+        from Favory f
         join fetch f.user
         join fetch f.media
+        join FavoryTagMapping ftm on ftm.favory = f
+        join ftm.tag t
         where f.deletedAt is null
           and lower(t.name) like lower(concat(:tag, '%'))
-        order by f.createdAt desc
         """,
         countQuery = """
         select count(distinct f.id)
-        from FavoryTagMapping ftm
+        from Favory f
+        join FavoryTagMapping ftm on ftm.favory = f
         join ftm.tag t
-        join ftm.favory f
         where f.deletedAt is null
           and lower(t.name) like lower(concat(:tag, '%'))
         """
@@ -74,15 +73,14 @@ interface FavoryTagMappingRepository : JpaRepository<FavoryTagMapping, Long> {
     @Query(
         value = """
         select distinct f
-        from FavoryTagMapping ftm
-        join ftm.tag t
-        join ftm.favory f
+        from Favory f
         join fetch f.user
         join fetch f.media m
+        join FavoryTagMapping ftm on ftm.favory = f
+        join ftm.tag t
         where f.deletedAt is null
           and m.type = :mediaType
           and lower(t.name) like lower(concat(:tag, '%'))
-        order by f.createdAt desc
         """,
         countQuery = """
         select count(distinct f.id)
