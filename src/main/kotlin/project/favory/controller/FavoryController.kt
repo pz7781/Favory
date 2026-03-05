@@ -2,20 +2,24 @@ package project.favory.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import project.favory.config.swagger.SecurityNotRequired
 import project.favory.dto.common.PageResponse
 import project.favory.dto.favory.request.CreateFavoryRequest
 import project.favory.dto.favory.request.UpdateFavoryRequest
 import project.favory.dto.favory.response.FavoryResponse
 import project.favory.entity.MediaType
 import project.favory.service.FavoryService
+import project.favory.service.LikeService
+import project.favory.service.UserService
 
-@Tag(name = "Favory", description = "Favory 생성/조회/수정/삭제")
+@Tag(name = "Favory", description = "Favory 생성/조회/수정/삭제 및 좋아요")
 @RestController
 @RequestMapping("/favories")
 class FavoryController(
-    private val favoryService: FavoryService
+    private val favoryService: FavoryService,
+    private val likeService: LikeService,
+    private val userService: UserService
 ) {
 
     @Operation(summary = "Favory 생성")
@@ -72,5 +76,14 @@ class FavoryController(
     @DeleteMapping("/{id}")
     fun deleteFavory(@PathVariable id: Long) {
         favoryService.deleteFavory(id)
+    }
+
+    @Operation(summary = "Favory 좋아요 등록/취소")
+    @PostMapping("/like/{favoryId}")
+    fun toggleLike(@PathVariable favoryId: Long): ResponseEntity<Map<String, Boolean>> {
+        val user = userService.getCurrentUserOrThrow()
+        val liked = likeService.toggleLike(user.id!!, favoryId)
+
+        return ResponseEntity.ok(mapOf("liked" to liked))
     }
 }
