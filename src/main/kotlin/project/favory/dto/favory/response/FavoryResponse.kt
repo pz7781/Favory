@@ -17,6 +17,8 @@ data class FavoryResponse(
     val title: String,
     val content: String,
     val tags: List<TagInfo> = emptyList(),
+    val likeCount: Long,
+    val likedByMe: Boolean,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
     val deletedAt: LocalDateTime?

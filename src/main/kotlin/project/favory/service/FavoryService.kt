@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import project.favory.dto.common.PageResponse
@@ -29,7 +30,9 @@ class FavoryService(
     private val commentRepository: CommentRepository,
     private val favoryTagMappingRepository: FavoryTagMappingRepository,
     private val tagRepository: TagRepository,
-    private val authService: AuthService
+    private val authService: AuthService,
+    private val likeRepository: LikeRepository,
+    private val userService: UserService
 ) {
 
     @Transactional
@@ -86,6 +89,7 @@ class FavoryService(
     ): PageResponse<FavoryResponse> {
         val sort = when (sortBy) {
             "oldest" -> Sort.by(Sort.Direction.ASC, "createdAt")
+            "popular" -> Sort.by(Sort.Direction.DESC, "likeCount")
             else -> Sort.by(Sort.Direction.DESC, "createdAt")
         }
 
@@ -183,6 +187,7 @@ class FavoryService(
 
         val sort = when (sortBy) {
             "oldest" -> Sort.by(Sort.Direction.ASC, "createdAt")
+            "popular" -> Sort.by(Sort.Direction.DESC, "likeCount")
             else -> Sort.by(Sort.Direction.DESC, "createdAt")
         }
 
@@ -208,6 +213,12 @@ class FavoryService(
         val tags = favoryTagMappingRepository.findAllByFavoryId(id!!)
             .map { TagInfo(id = it.tag.id!!, name = it.tag.name) }
 
+        val currentUser = userService.getCurrentUserOrNull()
+
+        val liked = currentUser?.let {
+            likeRepository.existsByUserIdAndFavoryId(it.id!!, id!!)
+        } ?: false
+
         return FavoryResponse(
             id = id!!,
             userId = user.id!!,
@@ -222,6 +233,8 @@ class FavoryService(
             title = title,
             content = content,
             tags = tags,
+            likeCount = likeCount,
+            likedByMe = liked,
             createdAt = createdAt,
             updatedAt = updatedAt,
             deletedAt = deletedAt

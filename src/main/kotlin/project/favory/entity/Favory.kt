@@ -1,6 +1,5 @@
 package project.favory.entity
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
@@ -24,6 +23,9 @@ class Favory(
 
     @Column(columnDefinition = "TEXT", nullable = false)
     var content: String,
+
+    @Column(nullable = false)
+    var likeCount: Long = 0,
 
     @Column(nullable = true)
     var deletedAt: LocalDateTime?

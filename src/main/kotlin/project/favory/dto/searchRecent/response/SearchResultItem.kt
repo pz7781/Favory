@@ -17,6 +17,7 @@ class SearchResultItem(
     val title: String?,
     val content: String,
     val tags: List<TagInfo>,
+    val likeCount: Long,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
     val deletedAt: LocalDateTime?

@@ -2,20 +2,24 @@ package project.favory.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import project.favory.config.swagger.SecurityNotRequired
 import project.favory.dto.common.PageResponse
 import project.favory.dto.favory.request.CreateFavoryRequest
 import project.favory.dto.favory.request.UpdateFavoryRequest
 import project.favory.dto.favory.response.FavoryResponse
 import project.favory.entity.MediaType
 import project.favory.service.FavoryService
+import project.favory.service.LikeService
+import project.favory.service.UserService
 
-@Tag(name = "Favory", description = "Favory 생성/조회/수정/삭제")
+@Tag(name = "Favory", description = "Favory 생성/조회/수정/삭제 및 좋아요")
 @RestController
 @RequestMapping("/favories")
 class FavoryController(
-    private val favoryService: FavoryService
+    private val favoryService: FavoryService,
+    private val likeService: LikeService,
+    private val userService: UserService
 ) {
 
     @Operation(summary = "Favory 생성")
@@ -24,8 +28,7 @@ class FavoryController(
         return favoryService.createFavory(request)
     }
 
-    @SecurityNotRequired
-    @Operation(summary = "전체 Favory 조회 (페이징, 정렬: latest/oldest, 타입 필터)")
+    @Operation(summary = "전체 Favory 조회 (페이징, 정렬: latest/oldest/popular, 타입 필터)")
     @GetMapping
     fun getAllFavories(
         @RequestParam(defaultValue = "0") page: Int,
@@ -36,21 +39,18 @@ class FavoryController(
         return favoryService.getAllFavories(page, size, sort, type)
     }
 
-    @SecurityNotRequired
     @Operation(summary = "Favory 단건 조회")
     @GetMapping("/{id}")
     fun getFavory(@PathVariable id: Long): FavoryResponse {
         return favoryService.getFavory(id)
     }
 
-    @SecurityNotRequired
     @Operation(summary = "미디어별 Favory 조회")
     @GetMapping("/media/{mediaId}")
     fun getFavoriesByMedia(@PathVariable mediaId: Long): List<FavoryResponse> {
         return favoryService.getFavoriesByMedia(mediaId)
     }
 
-    @SecurityNotRequired
     @Operation(summary = "특정 사용자가 작성한 Favory 조회 (페이징, 정렬, 타입 필터)")
     @GetMapping("/users/{nickname}")
     fun getFavoriesByUser(
@@ -76,5 +76,14 @@ class FavoryController(
     @DeleteMapping("/{id}")
     fun deleteFavory(@PathVariable id: Long) {
         favoryService.deleteFavory(id)
+    }
+
+    @Operation(summary = "Favory 좋아요 등록/취소")
+    @PostMapping("/like/{favoryId}")
+    fun toggleLike(@PathVariable favoryId: Long): ResponseEntity<Map<String, Boolean>> {
+        val user = userService.getCurrentUserOrThrow()
+        val liked = likeService.toggleLike(user.id!!, favoryId)
+
+        return ResponseEntity.ok(mapOf("liked" to liked))
     }
 }

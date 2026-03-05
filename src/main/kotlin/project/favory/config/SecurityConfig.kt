@@ -56,6 +56,8 @@ class SecurityConfig(
                     .requestMatchers("/error").permitAll()
                     // 회원가입, 로그인, 이메일 인증
                     .requestMatchers("/signup", "/login/**", "/refresh-token", "/auth/email/**").permitAll()
+                    // favory 좋아요
+                    .requestMatchers(org.springframework.http.HttpMethod.POST, "/favories/like/**").authenticated()
                     // 유저 favory/comment 조회
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/favories", "/favories/**").permitAll()
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/comments/**").permitAll()
