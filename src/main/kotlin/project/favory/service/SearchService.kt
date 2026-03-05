@@ -272,6 +272,7 @@ class SearchService(
         title = this.title,
         content = this.content,
         tags = tags,
+        likeCount = this.likeCount,
         createdAt = this.createdAt,
         updatedAt = this.updatedAt,
         deletedAt = this.deletedAt
